@@ -23,45 +23,54 @@ export async function startCheckout(formData: FormData) {
     redirect(`/buy?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Invalid submission")}`);
   }
 
-  const currentLink = await getCurrentLink();
-  const stripe = getStripe();
-  const email = parsed.data.email || undefined;
+  let checkoutUrl: string;
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "payment",
-    success_url: `${SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${SITE_URL}/buy?canceled=1`,
-    customer_email: email,
-    line_items: [
-      {
-        quantity: 1,
-        price_data: {
-          currency: "usd",
-          unit_amount: currentLink.priceCents,
-          product_data: {
-            name: `${SITE_NAME} Owner #${currentLink.ownerNumber + 1}`,
-            description: `Take the homepage link for ${formatMoney(currentLink.priceCents)}.`,
+  try {
+    const currentLink = await getCurrentLink();
+    const stripe = getStripe();
+    const email = parsed.data.email || undefined;
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      success_url: `${SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${SITE_URL}/buy?canceled=1`,
+      customer_email: email,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "usd",
+            unit_amount: currentLink.priceCents,
+            product_data: {
+              name: `${SITE_NAME} Owner #${currentLink.ownerNumber + 1}`,
+              description: `Take the homepage link for ${formatMoney(currentLink.priceCents)}.`,
+            },
           },
         },
+      ],
+      metadata: {
+        url: parsed.data.url,
+        email: email ?? "",
+        ownerNumber: String(currentLink.ownerNumber + 1),
+        priceCents: String(currentLink.priceCents),
       },
-    ],
-    metadata: {
-      url: parsed.data.url,
-      email: email ?? "",
-      ownerNumber: String(currentLink.ownerNumber + 1),
-      priceCents: String(currentLink.priceCents),
-    },
-  });
+    });
 
-  if (!session.url) {
-    redirect("/buy?error=Stripe did not return a checkout URL");
+    if (!session.url) {
+      throw new Error("Stripe did not return a checkout URL");
+    }
+
+    await createPurchaseIntent({
+      url: parsed.data.url,
+      email,
+      stripeSessionId: session.id,
+    });
+
+    checkoutUrl = session.url;
+  } catch (error) {
+    console.error("Checkout setup failed", error);
+    redirect("/buy?error=Payment setup failed. Please try again.");
   }
 
-  await createPurchaseIntent({
-    url: parsed.data.url,
-    email,
-    stripeSessionId: session.id,
-  });
-
-  redirect(session.url);
+  redirect(checkoutUrl);
 }
