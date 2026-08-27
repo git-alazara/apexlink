@@ -91,6 +91,30 @@ export async function recordCurrentLinkClick() {
   return currentLink.url;
 }
 
+export async function getOrCreateVisitor(token?: string) {
+  if (token) {
+    const visitors = await prisma.$queryRaw<Array<{ token: string; visitorNumber: number }>>`
+      UPDATE "Visitor"
+      SET "lastSeenAt" = now()
+      WHERE "token" = ${token}
+      RETURNING "token", "visitorNumber"
+    `;
+
+    if (visitors[0]) {
+      return visitors[0];
+    }
+  }
+
+  const newToken = crypto.randomUUID();
+  const visitors = await prisma.$queryRaw<Array<{ token: string; visitorNumber: number }>>`
+    INSERT INTO "Visitor" ("id", "token", "lastSeenAt")
+    VALUES (${crypto.randomUUID()}, ${newToken}, now())
+    RETURNING "token", "visitorNumber"
+  `;
+
+  return visitors[0];
+}
+
 async function getPageViewStats(since: Date) {
   try {
     const [totalRows, recentRows] = await Promise.all([

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getCurrentLink, getSiteStats, recordPageView } from "@/lib/apex-link";
 import { formatMoney, SITE_DOMAIN } from "@/lib/config";
+import { VisitorBadge } from "@/app/visitor-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,7 @@ export default async function Home() {
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--accent)]">
               One link. One owner. One dollar more each time.
             </p>
+            <VisitorBadge />
             <h1 className="mt-6 max-w-3xl text-5xl font-black leading-[0.95] tracking-normal sm:text-6xl lg:text-7xl">
               The Apex Link is currently owned by #{currentLink.ownerNumber}.
             </h1>

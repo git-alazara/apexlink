@@ -66,3 +66,13 @@ model LinkClick {
   @@index([ownerNumber])
   @@index([createdAt])
 }
+
+model Visitor {
+  id            String   @id @default(cuid())
+  token         String   @unique
+  visitorNumber Int      @unique @default(autoincrement())
+  createdAt     DateTime @default(now())
+  lastSeenAt    DateTime @updatedAt
+
+  @@index([createdAt])
+}
