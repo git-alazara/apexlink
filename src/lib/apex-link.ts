@@ -34,6 +34,60 @@ export async function getOwnershipHistory() {
   });
 }
 
+export async function recordPageView(path: string) {
+  try {
+    await prisma.pageView.create({
+      data: { path },
+    });
+  } catch (error) {
+    console.warn("Page view tracking failed", error);
+  }
+}
+
+export async function getSiteStats() {
+  const currentLink = await getCurrentLink();
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const [pageViews, completedPurchases, pendingPurchases] = await Promise.all([
+    getPageViewStats(since),
+    prisma.ownership.count(),
+    prisma.purchaseIntent.count({
+      where: {
+        status: "PENDING",
+      },
+    }),
+  ]);
+
+  return {
+    totalViews: pageViews.totalViews,
+    recentViews: pageViews.recentViews,
+    completedPurchases,
+    pendingPurchases,
+    ownerNumber: currentLink.ownerNumber,
+    nextOwnerNumber: currentLink.ownerNumber + 1,
+    currentPriceCents: currentLink.priceCents,
+  };
+}
+
+async function getPageViewStats(since: Date) {
+  try {
+    const [totalViews, recentViews] = await Promise.all([
+      prisma.pageView.count(),
+      prisma.pageView.count({
+        where: {
+          createdAt: {
+            gte: since,
+          },
+        },
+      }),
+    ]);
+
+    return { totalViews, recentViews };
+  } catch (error) {
+    console.warn("Page view stats unavailable", error);
+    return { totalViews: 0, recentViews: 0 };
+  }
+}
+
 export async function createPurchaseIntent(input: {
   url: string;
   email?: string;

@@ -1,12 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getCurrentLink } from "@/lib/apex-link";
+import { getCurrentLink, getSiteStats, recordPageView } from "@/lib/apex-link";
 import { formatMoney, SITE_DOMAIN } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const currentLink = await getCurrentLink();
+  await recordPageView("/");
+  const [currentLink, stats] = await Promise.all([getCurrentLink(), getSiteStats()]);
 
   return (
     <main className="min-h-screen overflow-hidden bg-[var(--paper)] text-[var(--ink)]">
@@ -51,6 +52,24 @@ export default async function Home() {
             >
               {currentLink.url}
             </a>
+            <dl className="mt-10 grid max-w-3xl grid-cols-2 gap-px overflow-hidden border border-[var(--line)] bg-[var(--line)] sm:grid-cols-4">
+              <div className="bg-[var(--paper)] p-4">
+                <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Views</dt>
+                <dd className="mt-2 text-2xl font-black">{stats.totalViews.toLocaleString()}</dd>
+              </div>
+              <div className="bg-[var(--paper)] p-4">
+                <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">24h</dt>
+                <dd className="mt-2 text-2xl font-black">{stats.recentViews.toLocaleString()}</dd>
+              </div>
+              <div className="bg-[var(--paper)] p-4">
+                <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Owners</dt>
+                <dd className="mt-2 text-2xl font-black">{stats.completedPurchases.toLocaleString()}</dd>
+              </div>
+              <div className="bg-[var(--paper)] p-4">
+                <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Next</dt>
+                <dd className="mt-2 text-2xl font-black">#{stats.nextOwnerNumber}</dd>
+              </div>
+            </dl>
           </div>
 
           <aside className="border border-[var(--line)] bg-white p-6 shadow-[12px_12px_0_var(--shadow)]">

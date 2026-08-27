@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { startCheckout } from "./actions";
-import { getCurrentLink } from "@/lib/apex-link";
+import { getCurrentLink, getSiteStats, recordPageView } from "@/lib/apex-link";
 import { formatMoney, PRICE_INCREMENT_CENTS, SITE_DOMAIN } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
 export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
-  const currentLink = await getCurrentLink();
+  await recordPageView("/buy");
+  const [currentLink, stats] = await Promise.all([getCurrentLink(), getSiteStats()]);
   const params = await searchParams;
   const error = typeof params.error === "string" ? params.error : null;
   const canceled = params.canceled === "1";
@@ -79,6 +80,25 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
           <p className="mt-8 text-sm leading-6 text-[var(--muted)]">
             You are buying one hyperlink and nothing else. Links to illegal content, malware, phishing, pornography, hate or extremist material, and obvious scams may be removed and refunded. Card payments are handled by Stripe.
           </p>
+
+          <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden border border-[var(--line)] bg-[var(--line)] sm:grid-cols-4">
+            <div className="bg-[var(--paper)] p-4">
+              <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Views</dt>
+              <dd className="mt-2 text-xl font-black">{stats.totalViews.toLocaleString()}</dd>
+            </div>
+            <div className="bg-[var(--paper)] p-4">
+              <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Pending</dt>
+              <dd className="mt-2 text-xl font-black">{stats.pendingPurchases.toLocaleString()}</dd>
+            </div>
+            <div className="bg-[var(--paper)] p-4">
+              <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Owners</dt>
+              <dd className="mt-2 text-xl font-black">{stats.completedPurchases.toLocaleString()}</dd>
+            </div>
+            <div className="bg-[var(--paper)] p-4">
+              <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Price</dt>
+              <dd className="mt-2 text-xl font-black">{formatMoney(stats.currentPriceCents)}</dd>
+            </div>
+          </dl>
         </div>
       </section>
     </main>
