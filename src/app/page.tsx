@@ -23,7 +23,7 @@ export default async function Home() {
               width={40}
               height={40}
               priority
-              className="h-8 w-8 object-cover object-center"
+              className="h-10 w-10 object-cover object-center"
             />
             Apex Link
           </Link>
@@ -81,7 +81,7 @@ export default async function Home() {
               width={1024}
               height={1024}
               priority
-              className="mx-auto mb-6 aspect-square w-full max-w-52 border border-[var(--line)] object-cover"
+              className="mx-auto mb-6 aspect-square w-full max-w-52 object-cover"
             />
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-[var(--muted)]">Next owner price</p>
             <p className="mt-4 text-6xl font-black leading-none">{formatMoney(currentLink.priceCents)}</p>
