@@ -21,10 +21,14 @@ These rules apply to all coding agents and contributors in this repository.
 
 ## Environment Variables
 
+- Treat this repository as public. Assume anything committed can be read by anyone on the internet.
 - Never hardcode credentials, webhook secrets, database passwords, or deployment-specific URLs.
+- Never commit `.env`, `.env.local`, Cloudflare tunnel credential JSON files, origin certificates, Stripe keys, database URLs containing real passwords, GitHub tokens, SSH keys, or Kubernetes Secret manifests containing real base64 secret values.
+- Keep only safe placeholders in tracked example files such as `.env.example` and `.env.local.example`.
 - Required runtime configuration must be represented in `.env.example` and Kubernetes secrets/config maps.
 - Required secrets are `DATABASE_URL`, `POSTGRES_PASSWORD`, `STRIPE_SECRET_KEY`, and `STRIPE_WEBHOOK_SECRET`.
 - Public browser-safe config must use `NEXT_PUBLIC_` and should be limited to the site domain and site URL.
+- Before pushing, run a secret scan or targeted grep for Stripe keys, webhook secrets, private keys, Cloudflare credentials, GitHub tokens, and real database URLs.
 
 ## Architecture Boundaries
 
