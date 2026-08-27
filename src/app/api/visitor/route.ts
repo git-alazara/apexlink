@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { getOrCreateVisitor } from "@/lib/apex-link";
+import { getOrCreateVisitor, getTotalVisitors } from "@/lib/apex-link";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -11,7 +11,8 @@ export async function GET() {
   const cookieStore = await cookies();
   const token = cookieStore.get(VISITOR_COOKIE)?.value;
   const visitor = await getOrCreateVisitor(token);
-  const response = NextResponse.json({ visitorNumber: visitor.visitorNumber });
+  const totalVisitors = await getTotalVisitors();
+  const response = NextResponse.json({ totalVisitors, visitorNumber: visitor.visitorNumber });
 
   if (visitor.token !== token) {
     response.cookies.set(VISITOR_COOKIE, visitor.token, {

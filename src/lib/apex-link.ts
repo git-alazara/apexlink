@@ -132,6 +132,17 @@ export async function getOrCreateVisitor(token?: string) {
   return visitors[0];
 }
 
+export async function getTotalVisitors() {
+  try {
+    const rows = await prisma.$queryRaw<Array<{ count: bigint }>>`SELECT COUNT(*)::bigint AS count FROM "Visitor"`;
+
+    return Number(rows[0]?.count ?? 0);
+  } catch (error) {
+    console.warn("Visitor stats unavailable", error);
+    return 0;
+  }
+}
+
 async function getPageViewStats(since: Date) {
   try {
     const [totalRows, recentRows] = await Promise.all([
