@@ -1,0 +1,45 @@
+import Link from "next/link";
+import { getOwnershipHistory } from "@/lib/apex-link";
+import { formatMoney } from "@/lib/config";
+
+export const dynamic = "force-dynamic";
+
+export default async function HistoryPage() {
+  const history = await getOwnershipHistory();
+
+  return (
+    <main className="min-h-screen bg-[var(--paper)] px-5 py-6 text-[var(--ink)] sm:px-8">
+      <div className="mx-auto max-w-4xl">
+        <nav className="flex items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+          <Link href="/" className="hover:text-[var(--ink)]">
+            Apex Link
+          </Link>
+          <Link href="/buy" className="hover:text-[var(--ink)]">
+            Buy
+          </Link>
+        </nav>
+
+        <header className="py-12">
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--accent)]">Ownership history</p>
+          <h1 className="mt-5 max-w-2xl text-4xl font-black leading-tight tracking-normal sm:text-5xl">Every owner keeps a place.</h1>
+        </header>
+
+        <section className="border-t border-[var(--line)]">
+          {history.length === 0 ? (
+            <p className="py-10 text-lg text-[var(--muted)]">No owners yet. The first spot is still open.</p>
+          ) : (
+            history.map((owner) => (
+              <article key={owner.id} className="grid gap-4 border-b border-[var(--line)] py-6 sm:grid-cols-[140px_1fr_120px] sm:items-center">
+                <div className="text-3xl font-black">#{owner.ownerNumber}</div>
+                <a href={owner.url} className="break-all text-xl font-bold hover:text-[var(--accent)]" target="_blank" rel="noopener noreferrer">
+                  {owner.url}
+                </a>
+                <div className="font-black sm:text-right">{formatMoney(owner.priceCents)}</div>
+              </article>
+            ))
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}

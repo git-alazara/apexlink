@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PurchaseStatus {
+  PENDING
+  PAID
+  EXPIRED
+}
+
+model CurrentLink {
+  id              Int      @id @default(1)
+  url             String
+  email           String?
+  ownerNumber     Int      @default(0)
+  priceCents      Int
+  previousPriceCents Int?
+  stripeSessionId String?  @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PurchaseIntent {
+  id              String         @id @default(cuid())
+  url             String
+  email           String?
+  priceCents      Int
+  nextOwnerNumber Int
+  stripeSessionId String         @unique
+  status          PurchaseStatus @default(PENDING)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model Ownership {
+  id                    String   @id @default(cuid())
+  ownerNumber           Int      @unique
+  url                   String
+  email                 String?
+  priceCents            Int
+  stripeSessionId       String   @unique
+  stripePaymentIntentId String?
+  createdAt             DateTime @default(now())
+}

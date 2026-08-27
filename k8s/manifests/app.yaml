@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apex-link-app
+  namespace: apex-link
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apex-link-app
+  template:
+    metadata:
+      labels:
+        app: apex-link-app
+    spec:
+      initContainers:
+        - name: migrate
+          image: apex-link:latest
+          imagePullPolicy: IfNotPresent
+          command: ["npm", "run", "prisma:deploy"]
+          envFrom:
+            - secretRef:
+                name: apex-link-secrets
+            - configMapRef:
+                name: apex-link-config
+      containers:
+        - name: app
+          image: apex-link:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: apex-link-secrets
+            - configMapRef:
+                name: apex-link-config
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 768Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apex-link-service
+  namespace: apex-link
+spec:
+  selector:
+    app: apex-link-app
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

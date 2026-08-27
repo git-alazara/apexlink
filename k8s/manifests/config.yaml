@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apex-link-config
+  namespace: apex-link
+data:
+  NEXT_PUBLIC_SITE_DOMAIN: buyapexlink.com
+  NEXT_PUBLIC_SITE_URL: https://buyapexlink.com
+  INITIAL_PRICE_CENTS: "1000"
+  PRICE_INCREMENT_CENTS: "100"

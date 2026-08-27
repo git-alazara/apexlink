@@ -1,36 +1,141 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Apex Link
 
-## Getting Started
+Apex Link is a self-hosted scarce homepage-link purchase flow for `buyapexlink.com`.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 App Router with TypeScript and Tailwind CSS
+- Stripe Checkout for card payments
+- Stripe webhooks for confirmed ownership changes
+- Postgres in Kubernetes
+- Prisma ORM and migrations
+- Docker plus Kubernetes manifests
+- Cloudflare Tunnel routing to the in-cluster service
+
+## Local Testing
+
+The fastest local loop uses Docker only for Postgres and runs Next.js directly on localhost.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run local:dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The first run creates `.env.local` from `.env.local.example`, starts Postgres at `localhost:5432`, applies Prisma migrations, and starts the app at:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Useful local commands:
 
-## Learn More
+```bash
+npm run local:db       # start only local Postgres
+npm run local:dev      # start Postgres, migrate, then run next dev
+npm run local:logs     # follow local Postgres logs
+npm run local:reset-db # wipe and recreate the local database from migrations
+npm run local:stop     # stop local Postgres
+npm run prisma:studio  # inspect local data in Prisma Studio
+npm run quality        # Prisma, lint, typecheck, and production build
+```
 
-To learn more about Next.js, take a look at the following resources:
+You can test the homepage, buy form validation, history page, and health check without Stripe keys:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+http://localhost:3000
+http://localhost:3000/buy
+http://localhost:3000/history
+http://localhost:3000/api/health
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+To test the full Stripe Checkout flow locally, put Stripe test keys into `.env.local`, then run this in a second terminal:
 
-## Deploy on Vercel
+```bash
+npm run stripe:listen
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Copy the `whsec_...` value printed by Stripe CLI into `STRIPE_WEBHOOK_SECRET` in `.env.local`, restart `npm run local:dev`, and buy through `/buy` using a Stripe test card.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+4242 4242 4242 4242
+Any future expiry
+Any CVC
+```
+
+The local webhook target is:
+
+```text
+http://localhost:3000/api/stripe/webhook
+```
+
+## Basic Setup
+
+```bash
+cp .env.example .env
+npm install
+npm run prisma:generate
+npm run dev
+```
+
+For local checkout testing, point Stripe webhooks at:
+
+```text
+/api/stripe/webhook
+```
+
+The required Stripe event is:
+
+```text
+checkout.session.completed
+```
+
+## Environment
+
+Set real values in `.env` or the Kubernetes secret created by `ops/apply-secrets.sh`:
+
+```text
+DATABASE_URL=postgresql://postgres:<password>@postgres:5432/apexlink
+POSTGRES_PASSWORD=<strong password>
+STRIPE_SECRET_KEY=<stripe secret key>
+STRIPE_WEBHOOK_SECRET=<stripe webhook secret>
+NEXT_PUBLIC_SITE_DOMAIN=buyapexlink.com
+NEXT_PUBLIC_SITE_URL=https://buyapexlink.com
+INITIAL_PRICE_CENTS=1000
+PRICE_INCREMENT_CENTS=100
+```
+
+## Kubernetes Deployment
+
+Build the image:
+
+```bash
+./ops/build-local.sh
+```
+
+Create or update secrets from `.env`:
+
+```bash
+./ops/apply-secrets.sh .env
+```
+
+Configure Cloudflare Tunnel and DNS for `buyapexlink.com`:
+
+```bash
+./ops/cloudflare-setup.sh buyapexlink.com --origincert ~/.cloudflared/cert-buyapexlink.com.pem
+```
+
+Apply manifests:
+
+```bash
+./ops/deploy.sh
+```
+
+The app deployment runs `npm run prisma:deploy` as an init container before starting Next.js.
+
+## Purchase Flow
+
+1. Buyer enters a URL and optional email on `/buy`.
+2. The app creates a Stripe Checkout session at the current price.
+3. Stripe sends `checkout.session.completed` to `/api/stripe/webhook`.
+4. The webhook records ownership, updates the homepage link immediately, and raises the next price by `$1`.
+5. `/history` keeps the permanent owner list.

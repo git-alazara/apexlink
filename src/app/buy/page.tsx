@@ -1,0 +1,86 @@
+import Link from "next/link";
+import { startCheckout } from "./actions";
+import { getCurrentLink } from "@/lib/apex-link";
+import { formatMoney, PRICE_INCREMENT_CENTS, SITE_DOMAIN } from "@/lib/config";
+
+export const dynamic = "force-dynamic";
+
+export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
+  const currentLink = await getCurrentLink();
+  const params = await searchParams;
+  const error = typeof params.error === "string" ? params.error : null;
+  const canceled = params.canceled === "1";
+
+  return (
+    <main className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
+      <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-5 py-6 sm:px-8">
+        <nav className="flex items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+          <Link href="/" className="hover:text-[var(--ink)]">
+            Apex Link
+          </Link>
+          <Link href="/history" className="hover:text-[var(--ink)]">
+            History
+          </Link>
+        </nav>
+
+        <div className="flex flex-1 flex-col justify-center py-14">
+          <p className="mb-5 text-sm font-bold uppercase tracking-[0.2em] text-[var(--accent)]">
+            Take the link
+          </p>
+          <h1 className="max-w-2xl text-4xl font-black leading-tight tracking-normal sm:text-5xl">
+            Buy the most visible link on {SITE_DOMAIN}.
+          </h1>
+          <p className="mt-6 max-w-xl text-lg leading-8 text-[var(--muted)]">
+            Your website becomes the homepage link until somebody pays more. No auction, no refund when replaced, just one public spot and a permanent owner number.
+          </p>
+
+          <div className="mt-10 border-y border-[var(--line)] py-8">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
+                  Current price
+                </p>
+                <p className="mt-2 text-5xl font-black leading-none">{formatMoney(currentLink.priceCents)}</p>
+              </div>
+              <p className="text-sm font-semibold text-[var(--muted)]">
+                One payment. You become Owner #{currentLink.ownerNumber + 1}. Next price rises by {formatMoney(PRICE_INCREMENT_CENTS)}.
+              </p>
+            </div>
+          </div>
+
+          <form action={startCheckout} className="mt-8 grid gap-4">
+            <label className="grid gap-2 text-sm font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+              Website URL
+              <input
+                name="url"
+                type="url"
+                required
+                placeholder="https://example.com"
+                className="h-14 rounded-none border border-[var(--line)] bg-white px-4 text-base font-semibold normal-case tracking-normal text-[var(--ink)] outline-none transition focus:border-[var(--ink)]"
+              />
+            </label>
+            <label className="grid gap-2 text-sm font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+              Email optional
+              <input
+                name="email"
+                type="email"
+                placeholder="owner@example.com"
+                className="h-14 rounded-none border border-[var(--line)] bg-white px-4 text-base font-semibold normal-case tracking-normal text-[var(--ink)] outline-none transition focus:border-[var(--ink)]"
+              />
+            </label>
+            <button className="mt-2 h-14 bg-[var(--ink)] px-6 text-base font-black uppercase tracking-[0.12em] text-white transition hover:bg-[var(--accent)]">
+              Continue to payment - {formatMoney(currentLink.priceCents)}
+            </button>
+          </form>
+
+          {error ? <p className="mt-4 text-sm font-semibold text-[var(--danger)]">{error}</p> : null}
+          {canceled ? <p className="mt-4 text-sm font-semibold text-[var(--muted)]">Checkout canceled. The link is still available.</p> : null}
+
+          <p className="mt-8 text-sm leading-6 text-[var(--muted)]">
+            You are buying one hyperlink and nothing else. Links to illegal content, malware, phishing, pornography, hate or extremist material, and obvious scams may be removed and refunded. Card payments are handled by Stripe.
+          </p>
+        </div>
+      </section>
+    </main>
+  );
+}
