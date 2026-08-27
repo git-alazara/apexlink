@@ -28,17 +28,24 @@ export async function getCurrentLink() {
 }
 
 export async function getOwnershipHistory() {
-  return prisma.ownership.findMany({
+  const owners = await prisma.ownership.findMany({
     orderBy: { ownerNumber: "desc" },
     take: 100,
   });
+
+  const ownersWithClicks = await Promise.all(
+    owners.map(async (owner) => ({
+      ...owner,
+      clicks: await getOwnerClickCount(owner.ownerNumber),
+    })),
+  );
+
+  return ownersWithClicks;
 }
 
 export async function recordPageView(path: string) {
   try {
-    await prisma.pageView.create({
-      data: { path },
-    });
+    await prisma.$executeRaw`INSERT INTO "PageView" ("id", "path") VALUES (${crypto.randomUUID()}, ${path})`;
   } catch (error) {
     console.warn("Page view tracking failed", error);
   }
@@ -47,8 +54,9 @@ export async function recordPageView(path: string) {
 export async function getSiteStats() {
   const currentLink = await getCurrentLink();
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const [pageViews, completedPurchases, pendingPurchases] = await Promise.all([
+  const [pageViews, linkClicks, completedPurchases, pendingPurchases] = await Promise.all([
     getPageViewStats(since),
+    getLinkClickStats(currentLink.ownerNumber, since),
     prisma.ownership.count(),
     prisma.purchaseIntent.count({
       where: {
@@ -60,6 +68,9 @@ export async function getSiteStats() {
   return {
     totalViews: pageViews.totalViews,
     recentViews: pageViews.recentViews,
+    totalClicks: linkClicks.totalClicks,
+    recentClicks: linkClicks.recentClicks,
+    currentOwnerClicks: linkClicks.currentOwnerClicks,
     completedPurchases,
     pendingPurchases,
     ownerNumber: currentLink.ownerNumber,
@@ -68,23 +79,62 @@ export async function getSiteStats() {
   };
 }
 
+export async function recordCurrentLinkClick() {
+  const currentLink = await getCurrentLink();
+
+  try {
+    await prisma.$executeRaw`INSERT INTO "LinkClick" ("id", "url", "ownerNumber") VALUES (${crypto.randomUUID()}, ${currentLink.url}, ${currentLink.ownerNumber})`;
+  } catch (error) {
+    console.warn("Link click tracking failed", error);
+  }
+
+  return currentLink.url;
+}
+
 async function getPageViewStats(since: Date) {
   try {
-    const [totalViews, recentViews] = await Promise.all([
-      prisma.pageView.count(),
-      prisma.pageView.count({
-        where: {
-          createdAt: {
-            gte: since,
-          },
-        },
-      }),
+    const [totalRows, recentRows] = await Promise.all([
+      prisma.$queryRaw<Array<{ count: bigint }>>`SELECT COUNT(*)::bigint AS count FROM "PageView"`,
+      prisma.$queryRaw<Array<{ count: bigint }>>`SELECT COUNT(*)::bigint AS count FROM "PageView" WHERE "createdAt" >= ${since}`,
     ]);
 
-    return { totalViews, recentViews };
+    return {
+      totalViews: Number(totalRows[0]?.count ?? 0),
+      recentViews: Number(recentRows[0]?.count ?? 0),
+    };
   } catch (error) {
     console.warn("Page view stats unavailable", error);
     return { totalViews: 0, recentViews: 0 };
+  }
+}
+
+async function getLinkClickStats(ownerNumber: number, since: Date) {
+  try {
+    const [totalRows, recentRows, ownerRows] = await Promise.all([
+      prisma.$queryRaw<Array<{ count: bigint }>>`SELECT COUNT(*)::bigint AS count FROM "LinkClick"`,
+      prisma.$queryRaw<Array<{ count: bigint }>>`SELECT COUNT(*)::bigint AS count FROM "LinkClick" WHERE "createdAt" >= ${since}`,
+      prisma.$queryRaw<Array<{ count: bigint }>>`SELECT COUNT(*)::bigint AS count FROM "LinkClick" WHERE "ownerNumber" = ${ownerNumber}`,
+    ]);
+
+    return {
+      totalClicks: Number(totalRows[0]?.count ?? 0),
+      recentClicks: Number(recentRows[0]?.count ?? 0),
+      currentOwnerClicks: Number(ownerRows[0]?.count ?? 0),
+    };
+  } catch (error) {
+    console.warn("Link click stats unavailable", error);
+    return { totalClicks: 0, recentClicks: 0, currentOwnerClicks: 0 };
+  }
+}
+
+async function getOwnerClickCount(ownerNumber: number) {
+  try {
+    const rows = await prisma.$queryRaw<Array<{ count: bigint }>>`SELECT COUNT(*)::bigint AS count FROM "LinkClick" WHERE "ownerNumber" = ${ownerNumber}`;
+
+    return Number(rows[0]?.count ?? 0);
+  } catch (error) {
+    console.warn("Owner click stats unavailable", error);
+    return 0;
   }
 }
 

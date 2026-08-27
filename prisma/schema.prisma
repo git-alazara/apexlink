@@ -56,3 +56,13 @@ model PageView {
   @@index([path])
   @@index([createdAt])
 }
+
+model LinkClick {
+  id          String   @id @default(cuid())
+  url         String
+  ownerNumber Int
+  createdAt   DateTime @default(now())
+
+  @@index([ownerNumber])
+  @@index([createdAt])
+}

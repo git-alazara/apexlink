@@ -31,8 +31,8 @@ export default async function HistoryPage() {
             <dd className="mt-2 text-xl font-black">{stats.totalViews.toLocaleString()}</dd>
           </div>
           <div className="bg-[var(--paper)] p-4">
-            <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">24h views</dt>
-            <dd className="mt-2 text-xl font-black">{stats.recentViews.toLocaleString()}</dd>
+            <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Total clicks</dt>
+            <dd className="mt-2 text-xl font-black">{stats.totalClicks.toLocaleString()}</dd>
           </div>
           <div className="bg-[var(--paper)] p-4">
             <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Owners</dt>
@@ -49,11 +49,14 @@ export default async function HistoryPage() {
             <p className="py-10 text-lg text-[var(--muted)]">No owners yet. The first spot is still open.</p>
           ) : (
             history.map((owner) => (
-              <article key={owner.id} className="grid gap-4 border-b border-[var(--line)] py-6 sm:grid-cols-[140px_1fr_120px] sm:items-center">
+              <article key={owner.id} className="grid gap-4 border-b border-[var(--line)] py-6 sm:grid-cols-[120px_1fr_100px_100px] sm:items-center">
                 <div className="text-3xl font-black">#{owner.ownerNumber}</div>
                 <a href={owner.url} className="break-all text-xl font-bold hover:text-[var(--accent)]" target="_blank" rel="noopener noreferrer">
                   {owner.url}
                 </a>
+                <div className="text-sm font-black uppercase tracking-[0.14em] text-[var(--muted)] sm:text-right">
+                  {owner.clicks.toLocaleString()} clicks
+                </div>
                 <div className="font-black sm:text-right">{formatMoney(owner.priceCents)}</div>
               </article>
             ))

@@ -17,12 +17,12 @@ export default async function Home() {
         <nav className="relative z-10 flex items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
           <Link href="/" className="flex items-center gap-3 text-[var(--ink)]">
             <Image
-              src="/apex-link-logo.jpeg"
+              src="/apex-link-logo.png"
               alt="Apex Link"
-              width={36}
-              height={20}
+              width={40}
+              height={40}
               priority
-              className="h-8 w-14 object-cover object-center"
+              className="h-8 w-8 object-cover object-center"
             />
             Apex Link
           </Link>
@@ -45,7 +45,7 @@ export default async function Home() {
               The Apex Link is currently owned by #{currentLink.ownerNumber}.
             </h1>
             <a
-              href={currentLink.url}
+              href="/go"
               target="_blank"
               rel="noopener noreferrer"
               className="mt-8 block max-w-3xl break-all text-2xl font-black text-[var(--accent)] underline decoration-[var(--accent-soft)] decoration-4 underline-offset-8 hover:text-[var(--ink)] sm:text-4xl"
@@ -58,28 +58,28 @@ export default async function Home() {
                 <dd className="mt-2 text-2xl font-black">{stats.totalViews.toLocaleString()}</dd>
               </div>
               <div className="bg-[var(--paper)] p-4">
-                <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">24h</dt>
-                <dd className="mt-2 text-2xl font-black">{stats.recentViews.toLocaleString()}</dd>
+                <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Clicks</dt>
+                <dd className="mt-2 text-2xl font-black">{stats.totalClicks.toLocaleString()}</dd>
               </div>
               <div className="bg-[var(--paper)] p-4">
-                <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Owners</dt>
-                <dd className="mt-2 text-2xl font-black">{stats.completedPurchases.toLocaleString()}</dd>
+                <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">24h clicks</dt>
+                <dd className="mt-2 text-2xl font-black">{stats.recentClicks.toLocaleString()}</dd>
               </div>
               <div className="bg-[var(--paper)] p-4">
-                <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Next</dt>
-                <dd className="mt-2 text-2xl font-black">#{stats.nextOwnerNumber}</dd>
+                <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Current</dt>
+                <dd className="mt-2 text-2xl font-black">{stats.currentOwnerClicks.toLocaleString()}</dd>
               </div>
             </dl>
           </div>
 
           <aside className="border border-[var(--line)] bg-white p-6 shadow-[12px_12px_0_var(--shadow)]">
             <Image
-              src="/apex-link-logo.jpeg"
+              src="/apex-link-logo.png"
               alt="Apex Link logo"
-              width={960}
-              height={540}
+              width={1024}
+              height={1024}
               priority
-              className="mb-6 aspect-[16/9] w-full border border-[var(--line)] object-cover"
+              className="mx-auto mb-6 aspect-square w-full max-w-52 border border-[var(--line)] object-cover"
             />
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-[var(--muted)]">Next owner price</p>
             <p className="mt-4 text-6xl font-black leading-none">{formatMoney(currentLink.priceCents)}</p>

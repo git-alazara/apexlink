@@ -1,0 +1,20 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Apex Link logo</title>
+  <desc id="desc">A square black and gold monogram for Apex Link.</desc>
+  <rect width="1024" height="1024" fill="#12100D"/>
+  <rect x="80" y="80" width="864" height="864" fill="#F7F1E4"/>
+  <rect x="116" y="116" width="792" height="792" fill="#15120D"/>
+
+  <path d="M248 748L512 248L776 748H646L512 493L378 748H248Z" fill="#F7F1E4"/>
+  <path d="M443 612H581L638 718H386L443 612Z" fill="#15120D"/>
+
+  <path d="M315 748L512 374L709 748H615L512 551L409 748H315Z" fill="#D6B25E"/>
+  <path d="M455 630H569L606 699H418L455 630Z" fill="#15120D"/>
+
+  <path d="M330 792H694" stroke="#D6B25E" stroke-width="36" stroke-linecap="square"/>
+  <path d="M694 792L636 734" stroke="#D6B25E" stroke-width="36" stroke-linecap="square"/>
+  <path d="M694 792L636 850" stroke="#D6B25E" stroke-width="36" stroke-linecap="square"/>
+
+  <rect x="380" y="178" width="264" height="72" fill="#15120D"/>
+  <rect x="416" y="196" width="192" height="36" fill="#D6B25E"/>
+</svg>

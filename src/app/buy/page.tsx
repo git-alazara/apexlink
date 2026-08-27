@@ -87,8 +87,8 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
               <dd className="mt-2 text-xl font-black">{stats.totalViews.toLocaleString()}</dd>
             </div>
             <div className="bg-[var(--paper)] p-4">
-              <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Pending</dt>
-              <dd className="mt-2 text-xl font-black">{stats.pendingPurchases.toLocaleString()}</dd>
+              <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Clicks</dt>
+              <dd className="mt-2 text-xl font-black">{stats.totalClicks.toLocaleString()}</dd>
             </div>
             <div className="bg-[var(--paper)] p-4">
               <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Owners</dt>
