@@ -106,27 +106,20 @@ PRICE_INCREMENT_CENTS=100
 
 ## Kubernetes Deployment
 
-Build the image:
+Use the complete deploy script for production:
+
+```bash
+./ops/complete-deploy.sh --domain buyapexlink.com --origincert ~/.cloudflared/cert-buyapexlink.com.pem
+```
+
+That command builds the Docker image, imports it into k3s when available, applies Kubernetes secrets from `.env`, configures Cloudflare Tunnel, applies manifests, waits for rollouts, and verifies `/api/health` inside the cluster.
+
+For debugging individual deployment steps, the lower-level scripts are still available:
 
 ```bash
 ./ops/build-local.sh
-```
-
-Create or update secrets from `.env`:
-
-```bash
 ./ops/apply-secrets.sh .env
-```
-
-Configure Cloudflare Tunnel and DNS for `buyapexlink.com`:
-
-```bash
 ./ops/cloudflare-setup.sh buyapexlink.com --origincert ~/.cloudflared/cert-buyapexlink.com.pem
-```
-
-Apply manifests:
-
-```bash
 ./ops/deploy.sh
 ```
 
