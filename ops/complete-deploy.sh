@@ -166,6 +166,10 @@ Cloudflare:  ${SKIP_TUNNEL}
 Reset DB:    ${RESET_DB}
 EOF
 
+if [ "${SKIP_TUNNEL}" != "true" ]; then
+  echo "Tunnel cert: ${ORIGIN_CERT}"
+fi
+
 step "Step 1/7: Build Docker Image"
 if [ "${SKIP_BUILD}" = "true" ]; then
   echo "Skipping Docker build."
