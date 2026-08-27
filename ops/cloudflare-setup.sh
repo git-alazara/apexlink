@@ -65,7 +65,7 @@ fi
 route_dns_record() {
   local host="$1"
   local output
-  if ! output="$(cloudflared --origincert "${ORIGIN_CERT}" tunnel route dns "${TUNNEL_ID}" "${host}" 2>&1)"; then
+  if ! output="$(cloudflared --origincert "${ORIGIN_CERT}" tunnel route dns --overwrite-dns "${TUNNEL_ID}" "${host}" 2>&1)"; then
     echo "${output}" >&2
     return 1
   fi
