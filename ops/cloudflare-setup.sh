@@ -65,10 +65,15 @@ fi
 route_dns_record() {
   local host="$1"
   local output
-  if ! output="$(cloudflared --origincert "${ORIGIN_CERT}" tunnel route dns "${TUNNEL_ID}" "${host}" --overwrite-dns 2>&1)"; then
+  if ! output="$(cloudflared --origincert "${ORIGIN_CERT}" tunnel route dns "${TUNNEL_ID}" "${host}" 2>&1)"; then
     echo "${output}" >&2
     if echo "${output}" | grep -q "An A, AAAA, or CNAME record with that host already exists"; then
-      echo "Delete the existing ${host} A/AAAA/CNAME record in Cloudflare DNS, then rerun this script." >&2
+      echo "Cloudflare already has a DNS record for ${host}." >&2
+      echo "Delete the existing ${host} A/AAAA/CNAME record, then add or rerun this script:" >&2
+      echo "  Type: CNAME" >&2
+      echo "  Name: ${host}" >&2
+      echo "  Target: ${TUNNEL_ID}.cfargotunnel.com" >&2
+      echo "  Proxy status: Proxied" >&2
     fi
     return 1
   fi

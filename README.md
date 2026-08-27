@@ -114,6 +114,8 @@ Use the complete deploy script for production:
 
 That command builds the Docker image, imports it into k3s when available, applies Kubernetes secrets from `.env`, configures Cloudflare Tunnel, applies manifests, waits for rollouts, and verifies `/api/health` inside the cluster.
 
+If Cloudflare reports that an A, AAAA, or CNAME record already exists, delete the existing DNS records for `buyapexlink.com` and `www.buyapexlink.com` in Cloudflare DNS, then rerun the deploy script. The desired records are proxied CNAME records pointing at `<tunnel-id>.cfargotunnel.com`.
+
 For debugging individual deployment steps, the lower-level scripts are still available:
 
 ```bash
