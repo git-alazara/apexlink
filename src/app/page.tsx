@@ -17,7 +17,7 @@ export default async function Home() {
         <nav className="relative z-10 flex items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
           <Link href="/" className="flex items-center gap-3 text-[var(--ink)]">
             <Image
-              src="/apex-link-logo.png"
+              src="/apex-logo.png"
               alt="Apex Link"
               width={40}
               height={40}
@@ -74,7 +74,7 @@ export default async function Home() {
 
           <aside className="border border-[var(--line)] bg-white p-6 shadow-[12px_12px_0_var(--shadow)]">
             <Image
-              src="/apex-link-logo.png"
+              src="/apex-logo.png"
               alt="Apex Link logo"
               width={1024}
               height={1024}
