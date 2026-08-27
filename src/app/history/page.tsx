@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getOwnershipHistory, getSiteStats, recordPageView } from "@/lib/apex-link";
-import { formatMoney } from "@/lib/config";
+import { formatDuration, formatMoney } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -49,11 +49,14 @@ export default async function HistoryPage() {
             <p className="py-10 text-lg text-[var(--muted)]">No owners yet. The first spot is still open.</p>
           ) : (
             history.map((owner) => (
-              <article key={owner.id} className="grid gap-4 border-b border-[var(--line)] py-6 sm:grid-cols-[120px_1fr_100px_100px] sm:items-center">
+              <article key={owner.id} className="grid gap-4 border-b border-[var(--line)] py-6 sm:grid-cols-[100px_1fr_120px_100px_100px] sm:items-center">
                 <div className="text-3xl font-black">#{owner.ownerNumber}</div>
                 <a href={owner.url} className="break-all text-xl font-bold hover:text-[var(--accent)]" target="_blank" rel="noopener noreferrer">
                   {owner.url}
                 </a>
+                <div className="text-sm font-black uppercase tracking-[0.14em] text-[var(--muted)] sm:text-right">
+                  {owner.endedAt ? formatDuration(owner.createdAt, owner.endedAt) : `${formatDuration(owner.createdAt)} live`}
+                </div>
                 <div className="text-sm font-black uppercase tracking-[0.14em] text-[var(--muted)] sm:text-right">
                   {owner.clicks.toLocaleString()} clicks
                 </div>

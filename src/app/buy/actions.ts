@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { formatMoney, SITE_NAME, SITE_URL } from "@/lib/config";
-import { createPurchaseIntent, getCurrentLink } from "@/lib/apex-link";
+import { createPurchaseIntent, getPurchaseState } from "@/lib/apex-link";
 import { getStripe } from "@/lib/stripe";
 
 const purchaseSchema = z.object({
@@ -26,7 +26,7 @@ export async function startCheckout(formData: FormData) {
   let checkoutUrl: string;
 
   try {
-    const currentLink = await getCurrentLink();
+    const { currentLink, price } = await getPurchaseState();
     const stripe = getStripe();
     const email = parsed.data.email || undefined;
 
@@ -40,10 +40,10 @@ export async function startCheckout(formData: FormData) {
           quantity: 1,
           price_data: {
             currency: "usd",
-            unit_amount: currentLink.priceCents,
+            unit_amount: price.currentPriceCents,
             product_data: {
               name: `${SITE_NAME} Owner #${currentLink.ownerNumber + 1}`,
-              description: `Take the homepage link for ${formatMoney(currentLink.priceCents)}.`,
+              description: `Take the homepage link for ${formatMoney(price.currentPriceCents)}.`,
             },
           },
         },
@@ -52,7 +52,7 @@ export async function startCheckout(formData: FormData) {
         url: parsed.data.url,
         email: email ?? "",
         ownerNumber: String(currentLink.ownerNumber + 1),
-        priceCents: String(currentLink.priceCents),
+        priceCents: String(price.currentPriceCents),
       },
     });
 
@@ -64,6 +64,8 @@ export async function startCheckout(formData: FormData) {
       url: parsed.data.url,
       email,
       stripeSessionId: session.id,
+      priceCents: price.currentPriceCents,
+      nextOwnerNumber: currentLink.ownerNumber + 1,
     });
 
     checkoutUrl = session.url;

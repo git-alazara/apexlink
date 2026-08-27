@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getCurrentLink, getSiteStats, recordPageView } from "@/lib/apex-link";
-import { formatMoney, SITE_DOMAIN } from "@/lib/config";
+import { formatDuration, formatMoney, PRICE_INCREMENT_CENTS, SITE_DOMAIN } from "@/lib/config";
 import { VisitorBadge } from "@/app/visitor-badge";
 
 export const dynamic = "force-dynamic";
@@ -84,10 +84,19 @@ export default async function Home() {
               className="mx-auto mb-6 aspect-square w-full max-w-52 object-cover"
             />
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-[var(--muted)]">Next owner price</p>
-            <p className="mt-4 text-6xl font-black leading-none">{formatMoney(currentLink.priceCents)}</p>
+            <p className="mt-4 text-6xl font-black leading-none">{formatMoney(stats.currentPriceCents)}</p>
             <p className="mt-5 text-base leading-7 text-[var(--muted)]">
               Pay once. Your URL replaces the homepage link immediately after payment confirmation.
             </p>
+            {stats.peakPriceCents > stats.floorPriceCents ? (
+              <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+                If nobody buys, this price decays from {formatMoney(stats.peakPriceCents)} back to {formatMoney(stats.floorPriceCents)} over {stats.decayDays} days, slowly at first and faster near the end. Full floor in {formatDuration(new Date(), stats.decayEndsAt)}.
+              </p>
+            ) : (
+              <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+                The price is at the {formatMoney(stats.floorPriceCents)} floor. After each purchase, the next price rises by {formatMoney(PRICE_INCREMENT_CENTS)} and slowly decays back over {stats.decayDays} days.
+              </p>
+            )}
             <Link href="/buy" className="mt-8 inline-flex h-12 w-full items-center justify-center bg-[var(--ink)] px-5 text-sm font-black uppercase tracking-[0.12em] text-white hover:bg-[var(--accent)]">
               Take the link
             </Link>

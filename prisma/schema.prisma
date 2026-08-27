@@ -46,6 +46,9 @@ model Ownership {
   stripeSessionId       String   @unique
   stripePaymentIntentId String?
   createdAt             DateTime @default(now())
+  endedAt               DateTime?
+
+  @@index([endedAt])
 }
 
 model PageView {

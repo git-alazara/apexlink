@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { startCheckout } from "./actions";
 import { getCurrentLink, getSiteStats, recordPageView } from "@/lib/apex-link";
-import { formatMoney, PRICE_INCREMENT_CENTS, SITE_DOMAIN } from "@/lib/config";
+import { formatDuration, formatMoney, PRICE_INCREMENT_CENTS, SITE_DOMAIN } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -41,12 +41,21 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
                 <p className="text-sm font-bold uppercase tracking-[0.18em] text-[var(--muted)]">
                   Current price
                 </p>
-                <p className="mt-2 text-5xl font-black leading-none">{formatMoney(currentLink.priceCents)}</p>
+                <p className="mt-2 text-5xl font-black leading-none">{formatMoney(stats.currentPriceCents)}</p>
               </div>
               <p className="text-sm font-semibold text-[var(--muted)]">
-                One payment. You become Owner #{currentLink.ownerNumber + 1}. Next price rises by {formatMoney(PRICE_INCREMENT_CENTS)}.
+                You become Owner #{currentLink.ownerNumber + 1}. After purchase, the next price rises by {formatMoney(PRICE_INCREMENT_CENTS)}, then decays back to {formatMoney(stats.floorPriceCents)} over {stats.decayDays} days.
               </p>
             </div>
+            {stats.peakPriceCents > stats.floorPriceCents ? (
+              <p className="mt-5 text-sm leading-6 text-[var(--muted)]">
+                Current decay window: peak {formatMoney(stats.peakPriceCents)}, floor {formatMoney(stats.floorPriceCents)}, slow early drop, faster late drop, full floor in {formatDuration(new Date(), stats.decayEndsAt)}.
+              </p>
+            ) : (
+              <p className="mt-5 text-sm leading-6 text-[var(--muted)]">
+                Current price is at the {formatMoney(stats.floorPriceCents)} floor. Future purchases still raise the next price by {formatMoney(PRICE_INCREMENT_CENTS)} before decay begins.
+              </p>
+            )}
           </div>
 
           <form action={startCheckout} className="mt-8 grid gap-4">
@@ -70,7 +79,7 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
               />
             </label>
             <button className="mt-2 h-14 bg-[var(--ink)] px-6 text-base font-black uppercase tracking-[0.12em] text-white transition hover:bg-[var(--accent)]">
-              Continue to payment - {formatMoney(currentLink.priceCents)}
+              Continue to payment - {formatMoney(stats.currentPriceCents)}
             </button>
           </form>
 

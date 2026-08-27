@@ -8,3 +8,4 @@ data:
   NEXT_PUBLIC_SITE_URL: https://buyapexlink.com
   INITIAL_PRICE_CENTS: "1000"
   PRICE_INCREMENT_CENTS: "100"
+  PRICE_DECAY_DAYS: "90"

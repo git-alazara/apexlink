@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { INITIAL_PRICE_CENTS, PRICE_INCREMENT_CENTS } from "@/lib/config";
+import { INITIAL_PRICE_CENTS, PRICE_DECAY_DAYS, PRICE_INCREMENT_CENTS } from "@/lib/config";
 
 const DEFAULT_LINK = "https://app.budgetgenie.io";
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export async function getCurrentLink() {
   await prisma.currentLink.updateMany({
@@ -43,6 +44,15 @@ export async function getOwnershipHistory() {
   return ownersWithClicks;
 }
 
+export async function getPurchaseState() {
+  const currentLink = await getCurrentLink();
+
+  return {
+    currentLink,
+    price: getPriceState(currentLink),
+  };
+}
+
 export async function recordPageView(path: string) {
   try {
     await prisma.$executeRaw`INSERT INTO "PageView" ("id", "path") VALUES (${crypto.randomUUID()}, ${path})`;
@@ -53,6 +63,7 @@ export async function recordPageView(path: string) {
 
 export async function getSiteStats() {
   const currentLink = await getCurrentLink();
+  const price = getPriceState(currentLink);
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const [pageViews, linkClicks, completedPurchases, pendingPurchases] = await Promise.all([
     getPageViewStats(since),
@@ -75,7 +86,13 @@ export async function getSiteStats() {
     pendingPurchases,
     ownerNumber: currentLink.ownerNumber,
     nextOwnerNumber: currentLink.ownerNumber + 1,
-    currentPriceCents: currentLink.priceCents,
+    currentPriceCents: price.currentPriceCents,
+    peakPriceCents: price.peakPriceCents,
+    floorPriceCents: price.floorPriceCents,
+    decayDays: price.decayDays,
+    decayStartedAt: price.decayStartedAt,
+    decayEndsAt: price.decayEndsAt,
+    decayProgress: price.decayProgress,
   };
 }
 
@@ -166,15 +183,15 @@ export async function createPurchaseIntent(input: {
   url: string;
   email?: string;
   stripeSessionId: string;
+  priceCents: number;
+  nextOwnerNumber: number;
 }) {
-  const currentLink = await getCurrentLink();
-
   return prisma.purchaseIntent.create({
     data: {
       url: input.url,
       email: input.email,
-      priceCents: currentLink.priceCents,
-      nextOwnerNumber: currentLink.ownerNumber + 1,
+      priceCents: input.priceCents,
+      nextOwnerNumber: input.nextOwnerNumber,
       stripeSessionId: input.stripeSessionId,
     },
   });
@@ -202,6 +219,18 @@ export async function completePurchase(stripeSessionId: string, paymentIntentId?
       return existingOwnership;
     }
 
+    const completedAt = new Date();
+
+    await tx.ownership.updateMany({
+      where: {
+        ownerNumber: intent.nextOwnerNumber - 1,
+        endedAt: null,
+      },
+      data: {
+        endedAt: completedAt,
+      },
+    });
+
     const ownership = await tx.ownership.create({
       data: {
         ownerNumber: intent.nextOwnerNumber,
@@ -210,6 +239,7 @@ export async function completePurchase(stripeSessionId: string, paymentIntentId?
         priceCents: intent.priceCents,
         stripeSessionId,
         stripePaymentIntentId: paymentIntentId ?? undefined,
+        createdAt: completedAt,
       },
     });
 
@@ -241,4 +271,37 @@ export async function completePurchase(stripeSessionId: string, paymentIntentId?
 
     return ownership;
   });
+}
+
+function getPriceState(currentLink: { priceCents: number; ownerNumber: number; updatedAt: Date }) {
+  const peakPriceCents = Math.max(currentLink.priceCents, INITIAL_PRICE_CENTS);
+
+  if (currentLink.ownerNumber === 0 || peakPriceCents <= INITIAL_PRICE_CENTS) {
+    return {
+      currentPriceCents: INITIAL_PRICE_CENTS,
+      peakPriceCents: INITIAL_PRICE_CENTS,
+      floorPriceCents: INITIAL_PRICE_CENTS,
+      decayDays: PRICE_DECAY_DAYS,
+      decayStartedAt: currentLink.updatedAt,
+      decayEndsAt: currentLink.updatedAt,
+      decayProgress: 1,
+    };
+  }
+
+  const decayDurationMs = Math.max(1, PRICE_DECAY_DAYS) * MS_PER_DAY;
+  const elapsedMs = Math.max(0, Date.now() - currentLink.updatedAt.getTime());
+  const linearProgress = Math.min(1, elapsedMs / decayDurationMs);
+  const progress = linearProgress ** 2;
+  const dropCents = peakPriceCents - INITIAL_PRICE_CENTS;
+  const currentPriceCents = Math.max(INITIAL_PRICE_CENTS, Math.ceil(peakPriceCents - dropCents * progress));
+
+  return {
+    currentPriceCents,
+    peakPriceCents,
+    floorPriceCents: INITIAL_PRICE_CENTS,
+    decayDays: PRICE_DECAY_DAYS,
+    decayStartedAt: currentLink.updatedAt,
+    decayEndsAt: new Date(currentLink.updatedAt.getTime() + decayDurationMs),
+    decayProgress: progress,
+  };
 }
