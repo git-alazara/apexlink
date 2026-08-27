@@ -211,6 +211,11 @@ if [ "${SKIP_TUNNEL}" != "true" ]; then
   kubectl apply -f k8s/manifests/cloudflare-tunnel.yaml
 fi
 
+kubectl -n apex-link rollout restart deployment/apex-link-app
+if [ "${SKIP_TUNNEL}" != "true" ]; then
+  kubectl -n apex-link rollout restart deployment/cloudflare-tunnel
+fi
+
 step "Step 6/7: Wait For Rollouts"
 wait_for_rollout statefulset/postgres 300s
 wait_for_rollout deployment/apex-link-app 300s
