@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { INITIAL_PRICE_CENTS, PRICE_DECAY_DAYS, PRICE_INCREMENT_CENTS } from "@/lib/config";
+import { INITIAL_PRICE_CENTS, PRICE_DECAY_DAYS } from "@/lib/config";
 
 const DEFAULT_LINK = "https://app.budgetgenie.io";
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -261,7 +261,7 @@ export async function completePurchase(stripeSessionId: string, paymentIntentId?
         email: intent.email,
         ownerNumber: intent.nextOwnerNumber,
         previousPriceCents: intent.priceCents,
-        priceCents: intent.priceCents + PRICE_INCREMENT_CENTS,
+        priceCents: intent.priceCents,
         stripeSessionId,
       },
       create: {
@@ -270,7 +270,7 @@ export async function completePurchase(stripeSessionId: string, paymentIntentId?
         email: intent.email,
         ownerNumber: intent.nextOwnerNumber,
         previousPriceCents: intent.priceCents,
-        priceCents: intent.priceCents + PRICE_INCREMENT_CENTS,
+        priceCents: intent.priceCents,
         stripeSessionId,
       },
     });

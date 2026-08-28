@@ -101,7 +101,7 @@ STRIPE_WEBHOOK_SECRET=<stripe webhook secret>
 NEXT_PUBLIC_SITE_DOMAIN=mostvaluable.link
 NEXT_PUBLIC_SITE_URL=https://mostvaluable.link
 INITIAL_PRICE_CENTS=1000
-PRICE_INCREMENT_CENTS=100
+PRICE_INCREMENT_CENTS=1
 ```
 
 ## Kubernetes Deployment
@@ -136,5 +136,5 @@ The app deployment runs `npm run prisma:deploy` as an init container before star
 1. Buyer enters a URL and optional email on `/buy`.
 2. The app creates a Stripe Checkout session at the current price.
 3. Stripe sends `checkout.session.completed` to `/api/stripe/webhook`.
-4. The webhook records ownership, updates the homepage link immediately, and raises the next price by `$1`.
+4. The webhook records ownership, updates the homepage link immediately, and uses the buyer-selected price as the new peak price.
 5. `/history` keeps the permanent owner list.

@@ -18,7 +18,7 @@ These rules apply to all coding agents and contributors in this repository.
 - `mostvaluable.link` is the primary public domain; `buyapexlink.com` may be routed as an alias.
 - The public flow is homepage, `/buy`, `/history`, Stripe Checkout, and Stripe webhook confirmation.
 - There is no admin panel in v1. Successful Stripe payment immediately updates the public link.
-- Pricing starts from `INITIAL_PRICE_CENTS` and increases by `PRICE_INCREMENT_CENTS`, currently `$1`, after each confirmed purchase.
+- Pricing starts from `INITIAL_PRICE_CENTS`. Buyers choose the price they pay, with a minimum of the current effective price plus `PRICE_INCREMENT_CENTS`, currently one cent.
 
 ## Environment Variables
 

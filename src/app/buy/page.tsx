@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { startCheckout } from "./actions";
+import { PriceInput } from "./price-input";
 import { getCurrentLink, getSiteStats, recordPageView } from "@/lib/apex-link";
 import { formatDuration, formatMoney, PRICE_INCREMENT_CENTS, SITE_DOMAIN } from "@/lib/config";
 
@@ -8,6 +9,8 @@ export const dynamic = "force-dynamic";
 export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
   await recordPageView("/buy");
   const [currentLink, stats] = await Promise.all([getCurrentLink(), getSiteStats()]);
+  const minimumPriceCents = stats.currentPriceCents + PRICE_INCREMENT_CENTS;
+  const minimumPriceDollars = (minimumPriceCents / 100).toFixed(2);
   const params = await searchParams;
   const error = typeof params.error === "string" ? params.error : null;
   const canceled = params.canceled === "1";
@@ -44,7 +47,7 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
                 <p className="mt-2 text-5xl font-black leading-none">{formatMoney(stats.currentPriceCents)}</p>
               </div>
               <p className="text-sm font-semibold text-[var(--muted)]">
-                You become Owner #{currentLink.ownerNumber + 1}. After purchase, the next price rises by {formatMoney(PRICE_INCREMENT_CENTS)}, then decays back to {formatMoney(stats.floorPriceCents)} over {stats.decayDays} days.
+                You become Owner #{currentLink.ownerNumber + 1}. Set your own price as long as it is at least {formatMoney(minimumPriceCents)}.
               </p>
             </div>
             {stats.peakPriceCents > stats.floorPriceCents ? (
@@ -53,12 +56,16 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
               </p>
             ) : (
               <p className="mt-5 text-sm leading-6 text-[var(--muted)]">
-                Current price is at the {formatMoney(stats.floorPriceCents)} floor. Future purchases still raise the next price by {formatMoney(PRICE_INCREMENT_CENTS)} before decay begins.
+                Current price is at the {formatMoney(stats.floorPriceCents)} floor. Your price must be at least {formatMoney(PRICE_INCREMENT_CENTS)} above the current price before decay begins again.
               </p>
             )}
           </div>
 
           <form action={startCheckout} className="mt-8 grid gap-4">
+            <label className="grid gap-2 text-sm font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+              Your price USD
+              <PriceInput minimumPriceDollars={minimumPriceDollars} />
+            </label>
             <label className="grid gap-2 text-sm font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
               Website URL
               <input
@@ -79,7 +86,7 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
               />
             </label>
             <button className="mt-2 h-14 bg-[var(--ink)] px-6 text-base font-black uppercase tracking-[0.12em] text-white transition hover:bg-[var(--accent)]">
-              Continue to payment - {formatMoney(stats.currentPriceCents)}
+              Continue to payment
             </button>
           </form>
 
@@ -87,7 +94,7 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
           {canceled ? <p className="mt-4 text-sm font-semibold text-[var(--muted)]">Checkout canceled. The link is still available.</p> : null}
 
           <p className="mt-8 text-sm leading-6 text-[var(--muted)]">
-            You are buying one hyperlink and nothing else. Links to illegal content, malware, phishing, pornography, hate or extremist material, and obvious scams may be removed and refunded. Card payments are handled by Stripe.
+            You are buying one hyperlink and nothing else. Promo codes can be applied in Stripe Checkout. Links to illegal content, malware, phishing, pornography, hate or extremist material, and obvious scams may be removed and refunded. Card payments are handled by Stripe.
           </p>
 
           <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden border border-[var(--line)] bg-[var(--line)] sm:grid-cols-4">
