@@ -2,14 +2,14 @@ import Link from "next/link";
 import { startCheckout } from "./actions";
 import { PriceInput } from "./price-input";
 import { getCurrentLink, getSiteStats, recordPageView } from "@/lib/apex-link";
-import { formatDuration, formatMoney, PRICE_INCREMENT_CENTS, SITE_DOMAIN } from "@/lib/config";
+import { formatDuration, formatMoney, SITE_DOMAIN } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
 export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
   await recordPageView("/buy");
   const [currentLink, stats] = await Promise.all([getCurrentLink(), getSiteStats()]);
-  const minimumPriceCents = stats.currentPriceCents + PRICE_INCREMENT_CENTS;
+  const minimumPriceCents = stats.currentPriceCents;
   const minimumPriceDollars = (minimumPriceCents / 100).toFixed(2);
   const params = await searchParams;
   const error = typeof params.error === "string" ? params.error : null;
@@ -47,7 +47,7 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
                 <p className="mt-2 text-5xl font-black leading-none">{formatMoney(stats.currentPriceCents)}</p>
               </div>
               <p className="text-sm font-semibold text-[var(--muted)]">
-                You become Owner #{currentLink.ownerNumber + 1}. Set your own price as long as it is at least {formatMoney(minimumPriceCents)}.
+                You become Owner #{currentLink.ownerNumber + 1}. Set your own price as long as it is at least the current price of {formatMoney(minimumPriceCents)}.
               </p>
             </div>
             {stats.peakPriceCents > stats.floorPriceCents ? (
@@ -56,7 +56,7 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
               </p>
             ) : (
               <p className="mt-5 text-sm leading-6 text-[var(--muted)]">
-                Current price is at the {formatMoney(stats.floorPriceCents)} floor. Your price must be at least {formatMoney(PRICE_INCREMENT_CENTS)} above the current price before decay begins again.
+                Current price is at the {formatMoney(stats.floorPriceCents)} floor. Set your own price to start a new decay window.
               </p>
             )}
           </div>

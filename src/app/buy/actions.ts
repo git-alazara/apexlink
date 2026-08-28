@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { formatMoney, PRICE_INCREMENT_CENTS, SITE_NAME, SITE_URL } from "@/lib/config";
+import { formatMoney, SITE_NAME, SITE_URL } from "@/lib/config";
 import { createPurchaseIntent, getPurchaseState } from "@/lib/apex-link";
 import { getStripe } from "@/lib/stripe";
 
@@ -42,7 +42,7 @@ export async function startCheckout(formData: FormData) {
     redirect("/buy?error=Payment setup failed. Please try again.");
   }
 
-  const minimumPriceCents = purchaseState.price.currentPriceCents + PRICE_INCREMENT_CENTS;
+  const minimumPriceCents = purchaseState.price.currentPriceCents;
 
   if (parsed.data.priceCents < minimumPriceCents) {
     redirect(`/buy?error=${encodeURIComponent(`Price must be at least ${formatMoney(minimumPriceCents)}.`)}`);
