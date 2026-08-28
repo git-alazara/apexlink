@@ -108,6 +108,27 @@ export async function recordCurrentLinkClick() {
   return currentLink.url;
 }
 
+export async function recordLinkClickForOwner(ownerNumber: number) {
+  const currentLink = await getCurrentLink();
+
+  const url =
+    ownerNumber === currentLink.ownerNumber
+      ? currentLink.url
+      : (await prisma.ownership.findUnique({ where: { ownerNumber } }))?.url;
+
+  if (!url) {
+    return null;
+  }
+
+  try {
+    await prisma.$executeRaw`INSERT INTO "LinkClick" ("id", "url", "ownerNumber") VALUES (${crypto.randomUUID()}, ${url}, ${ownerNumber})`;
+  } catch (error) {
+    console.warn("Link click tracking failed", error);
+  }
+
+  return url;
+}
+
 export async function getOrCreateVisitor(token?: string) {
   if (token) {
     const visitors = await prisma.$queryRaw<Array<{ token: string; visitorNumber: number }>>`
