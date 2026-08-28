@@ -24,8 +24,6 @@ export function PriceInput({ minimumPriceDollars }: PriceInputProps) {
       name="priceDollars"
       type="text"
       inputMode="decimal"
-      pattern="^[0-9]+(\\.[0-9]{2})?$"
-      min={minimumPriceDollars}
       required
       value={value}
       onChange={(event) => setValue(event.target.value)}
