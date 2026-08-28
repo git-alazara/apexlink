@@ -8,13 +8,14 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# Agent Rules for Apex Link
+# Agent Rules for Most Valuable Link
 
 These rules apply to all coding agents and contributors in this repository.
 
 ## Product Scope
 
-- Apex Link is a paid scarce-link app for `buyapexlink.com`.
+- Most Valuable Link is a paid scarce-link app for `mostvaluable.link`.
+- `mostvaluable.link` is the primary public domain; `buyapexlink.com` may be routed as an alias.
 - The public flow is homepage, `/buy`, `/history`, Stripe Checkout, and Stripe webhook confirmation.
 - There is no admin panel in v1. Successful Stripe payment immediately updates the public link.
 - Pricing starts from `INITIAL_PRICE_CENTS` and increases by `PRICE_INCREMENT_CENTS`, currently `$1`, after each confirmed purchase.
@@ -49,8 +50,8 @@ These rules apply to all coding agents and contributors in this repository.
 - Every deployable service must have a health endpoint, Docker support, and Kubernetes manifests.
 - The app listens on port `3000` and exposes `/api/health`.
 - Postgres runs inside the `apex-link` namespace unless the deployment docs are intentionally changed.
-- Cloudflare Tunnel should route `buyapexlink.com` and `www.buyapexlink.com` to `apex-link-service.apex-link.svc.cluster.local:3000`.
-- Use a domain-specific Cloudflare origin cert, for example `~/.cloudflared/cert-buyapexlink.com.pem`.
+- Cloudflare Tunnel should route `mostvaluable.link`, `www.mostvaluable.link`, and any aliases such as `buyapexlink.com` to `apex-link-service.apex-link.svc.cluster.local:3000`.
+- Use domain-specific Cloudflare origin certs, for example `~/.cloudflared/cert-mostvaluable.link.pem` and `~/.cloudflared/cert-buyapexlink.com.pem`.
 
 ## Code Quality
 

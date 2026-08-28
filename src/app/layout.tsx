@@ -13,8 +13,8 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Apex Link",
-  description: "Buy the one homepage link on buyapexlink.com.",
+  title: "Most Valuable Link",
+  description: "Buy the one homepage link on mostvaluable.link.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

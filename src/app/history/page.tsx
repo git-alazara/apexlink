@@ -13,7 +13,7 @@ export default async function HistoryPage() {
       <div className="mx-auto max-w-4xl">
         <nav className="flex items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
           <Link href="/" className="hover:text-[var(--ink)]">
-            Apex Link
+            Most Valuable Link
           </Link>
           <Link href="/buy" className="hover:text-[var(--ink)]">
             Buy

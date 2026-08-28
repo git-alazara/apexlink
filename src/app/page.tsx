@@ -19,13 +19,13 @@ export default async function Home() {
           <Link href="/" className="flex items-center gap-3 text-[var(--ink)]">
             <Image
               src="/apex-link.svg"
-              alt="Apex Link"
+              alt="Most Valuable Link"
               width={40}
               height={40}
               priority
               className="h-10 w-10 object-cover object-center"
             />
-            Apex Link
+            Most Valuable Link
           </Link>
           <div className="flex gap-5">
             <Link href="/history" className="hover:text-[var(--ink)]">
@@ -44,7 +44,7 @@ export default async function Home() {
             </p>
             <VisitorBadge />
             <h1 className="mt-6 max-w-3xl text-5xl font-black leading-[0.95] tracking-normal sm:text-6xl lg:text-7xl">
-              The Apex Link is currently owned by #{currentLink.ownerNumber}.
+              The Most Valuable Link is currently owned by #{currentLink.ownerNumber}.
             </h1>
             <a
               href="/go"
@@ -77,7 +77,7 @@ export default async function Home() {
           <aside className="border border-[var(--line)] bg-white p-6 shadow-[12px_12px_0_var(--shadow)]">
             <Image
               src="/apex-link.svg"
-              alt="Apex Link logo"
+              alt="Most Valuable Link logo"
               width={1024}
               height={1024}
               priority

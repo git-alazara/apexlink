@@ -1,6 +1,6 @@
-# Apex Link
+# Most Valuable Link
 
-Apex Link is a self-hosted scarce homepage-link purchase flow for `buyapexlink.com`.
+Most Valuable Link is a self-hosted scarce homepage-link purchase flow for `mostvaluable.link`.
 
 ## Stack
 
@@ -98,8 +98,8 @@ DATABASE_URL=postgresql://postgres:<password>@postgres:5432/apexlink
 POSTGRES_PASSWORD=<strong password>
 STRIPE_SECRET_KEY=<stripe secret key>
 STRIPE_WEBHOOK_SECRET=<stripe webhook secret>
-NEXT_PUBLIC_SITE_DOMAIN=buyapexlink.com
-NEXT_PUBLIC_SITE_URL=https://buyapexlink.com
+NEXT_PUBLIC_SITE_DOMAIN=mostvaluable.link
+NEXT_PUBLIC_SITE_URL=https://mostvaluable.link
 INITIAL_PRICE_CENTS=1000
 PRICE_INCREMENT_CENTS=100
 ```
@@ -109,19 +109,23 @@ PRICE_INCREMENT_CENTS=100
 Use the complete deploy script for production:
 
 ```bash
-./ops/complete-deploy.sh --domain buyapexlink.com --origincert ~/.cloudflared/cert-buyapexlink.com.pem
+./ops/complete-deploy.sh \
+	--domain mostvaluable.link \
+	--origincert ~/.cloudflared/cert-mostvaluable.link.pem \
+	--alias-domain buyapexlink.com \
+	--alias-origincert ~/.cloudflared/cert-buyapexlink.com.pem
 ```
 
 That command builds the Docker image, imports it into k3s when available, applies Kubernetes secrets from `.env`, configures Cloudflare Tunnel, applies manifests, waits for rollouts, and verifies `/api/health` inside the cluster.
 
-If Cloudflare reports that an A, AAAA, or CNAME record already exists, delete the existing DNS records for `buyapexlink.com` and `www.buyapexlink.com` in Cloudflare DNS, then rerun the deploy script. The desired records are proxied CNAME records pointing at `<tunnel-id>.cfargotunnel.com`.
+If Cloudflare reports that an A, AAAA, or CNAME record already exists, delete the existing DNS records for `mostvaluable.link`, `www.mostvaluable.link`, `buyapexlink.com`, or `www.buyapexlink.com` in Cloudflare DNS, then rerun the deploy script. The desired records are proxied CNAME records pointing at `<tunnel-id>.cfargotunnel.com`.
 
 For debugging individual deployment steps, the lower-level scripts are still available:
 
 ```bash
 ./ops/build-local.sh
 ./ops/apply-secrets.sh .env
-./ops/cloudflare-setup.sh buyapexlink.com --origincert ~/.cloudflared/cert-buyapexlink.com.pem
+./ops/cloudflare-setup.sh mostvaluable.link --origincert ~/.cloudflared/cert-mostvaluable.link.pem --alias-domain buyapexlink.com --alias-origincert ~/.cloudflared/cert-buyapexlink.com.pem
 ./ops/deploy.sh
 ```
 

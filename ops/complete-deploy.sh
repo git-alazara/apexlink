@@ -11,10 +11,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "${PROJECT_ROOT}"
 
-DOMAIN="${APEX_LINK_DOMAIN:-buyapexlink.com}"
+DOMAIN="${APEX_LINK_DOMAIN:-mostvaluable.link}"
 ENV_FILE="${ENV_FILE:-.env}"
 IMAGE="${IMAGE:-apex-link:latest}"
 ORIGIN_CERT="${CF_ORIGIN_CERT:-}"
+ALIAS_DOMAINS=()
+ALIAS_ORIGIN_CERTS=()
 SKIP_TUNNEL="false"
 SKIP_BUILD="false"
 SKIP_IMAGE_IMPORT="false"
@@ -25,10 +27,12 @@ usage() {
 Usage: ./ops/complete-deploy.sh [options]
 
 Options:
-  --domain <domain>        Public domain (default: buyapexlink.com)
+  --domain <domain>        Public domain (default: mostvaluable.link)
   --env-file <path>        Env file with production secrets (default: .env)
   --image <image>          Docker image tag to build/deploy (default: apex-link:latest)
   --origincert <path>      Domain-specific Cloudflare origin cert
+  --alias-domain <domain>  Additional domain to route to this app
+  --alias-origincert <path> Cloudflare origin cert for the preceding alias domain
   --skip-tunnel            Skip Cloudflare tunnel setup/update
   --skip-build             Skip Docker build
   --skip-image-import      Skip importing Docker image into k3s/containerd
@@ -53,6 +57,14 @@ while [ "$#" -gt 0 ]; do
       ;;
     --origincert)
       ORIGIN_CERT="$2"
+      shift 2
+      ;;
+    --alias-domain)
+      ALIAS_DOMAINS+=("$2")
+      shift 2
+      ;;
+    --alias-origincert)
+      ALIAS_ORIGIN_CERTS+=("$2")
       shift 2
       ;;
     --skip-tunnel)
@@ -155,10 +167,19 @@ if [ -z "${ORIGIN_CERT}" ]; then
   ORIGIN_CERT="${HOME}/.cloudflared/cert-${DOMAIN}.pem"
 fi
 
+if [ "${#ALIAS_DOMAINS[@]}" -eq 0 ] && [ -n "${APEX_LINK_ALIAS_DOMAINS:-buyapexlink.com}" ]; then
+  IFS=',' read -r -a ALIAS_DOMAINS <<< "${APEX_LINK_ALIAS_DOMAINS:-buyapexlink.com}"
+fi
+
+if [ "${#ALIAS_ORIGIN_CERTS[@]}" -eq 0 ] && [ -n "${APEX_LINK_ALIAS_ORIGIN_CERTS:-}" ]; then
+  IFS=',' read -r -a ALIAS_ORIGIN_CERTS <<< "${APEX_LINK_ALIAS_ORIGIN_CERTS}"
+fi
+
 cat <<EOF
-Apex Link production deploy
+Most Valuable Link production deploy
 
 Domain:      ${DOMAIN}
+Aliases:     ${ALIAS_DOMAINS[*]:-none}
 Env file:    ${ENV_FILE}
 Image:       ${IMAGE}
 Namespace:   apex-link
@@ -191,7 +212,15 @@ step "Step 4/7: Configure Cloudflare Tunnel"
 if [ "${SKIP_TUNNEL}" = "true" ]; then
   echo "Skipping Cloudflare tunnel setup."
 else
-  "${SCRIPT_DIR}/cloudflare-setup.sh" "${DOMAIN}" --origincert "${ORIGIN_CERT}"
+  TUNNEL_ARGS=("${DOMAIN}" --origincert "${ORIGIN_CERT}")
+  for index in "${!ALIAS_DOMAINS[@]}"; do
+    TUNNEL_ARGS+=(--alias-domain "${ALIAS_DOMAINS[$index]}")
+    if [ -n "${ALIAS_ORIGIN_CERTS[$index]:-}" ]; then
+      TUNNEL_ARGS+=(--alias-origincert "${ALIAS_ORIGIN_CERTS[$index]}")
+    fi
+  done
+
+  "${SCRIPT_DIR}/cloudflare-setup.sh" "${TUNNEL_ARGS[@]}"
 fi
 
 step "Step 5/7: Deploy Kubernetes Manifests"

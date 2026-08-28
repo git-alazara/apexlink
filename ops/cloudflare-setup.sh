@@ -2,18 +2,28 @@
 set -euo pipefail
 
 if [ -z "${1:-}" ]; then
-  echo "Usage: ./ops/cloudflare-setup.sh buyapexlink.com [--origincert /path/to/cert.pem]"
+  echo "Usage: ./ops/cloudflare-setup.sh mostvaluable.link [--origincert /path/to/cert.pem] [--alias-domain buyapexlink.com --alias-origincert /path/to/cert.pem]"
   exit 1
 fi
 
 DOMAIN="$1"
 ORIGIN_CERT="${CF_ORIGIN_CERT:-}"
+ALIAS_DOMAINS=()
+ALIAS_ORIGIN_CERTS=()
 shift || true
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --origincert)
       ORIGIN_CERT="$2"
+      shift 2
+      ;;
+    --alias-domain)
+      ALIAS_DOMAINS+=("$2")
+      shift 2
+      ;;
+    --alias-origincert)
+      ALIAS_ORIGIN_CERTS+=("$2")
       shift 2
       ;;
     *)
@@ -64,8 +74,9 @@ fi
 
 route_dns_record() {
   local host="$1"
+  local origin_cert="$2"
   local output
-  if ! output="$(cloudflared --origincert "${ORIGIN_CERT}" tunnel route dns "${TUNNEL_ID}" "${host}" 2>&1)"; then
+  if ! output="$(cloudflared --origincert "${origin_cert}" tunnel route dns "${TUNNEL_ID}" "${host}" 2>&1)"; then
     echo "${output}" >&2
     if echo "${output}" | grep -q "An A, AAAA, or CNAME record with that host already exists"; then
       echo "Cloudflare already has a DNS record for ${host}." >&2
@@ -87,8 +98,32 @@ route_dns_record() {
   echo "${output}"
 }
 
-route_dns_record "${DOMAIN}"
-route_dns_record "www.${DOMAIN}"
+route_dns_record "${DOMAIN}" "${ORIGIN_CERT}"
+route_dns_record "www.${DOMAIN}" "${ORIGIN_CERT}"
+
+CONFIG_INGRESS="      - hostname: ${DOMAIN}
+        service: http://apex-link-service.apex-link.svc.cluster.local:3000
+      - hostname: www.${DOMAIN}
+        service: http://apex-link-service.apex-link.svc.cluster.local:3000"
+
+for index in "${!ALIAS_DOMAINS[@]}"; do
+  alias_domain="${ALIAS_DOMAINS[$index]}"
+  alias_cert="${ALIAS_ORIGIN_CERTS[$index]:-${TUNNEL_DIR}/cert-${alias_domain}.pem}"
+
+  if [ ! -f "${alias_cert}" ]; then
+    echo "Missing Cloudflare origin cert for alias domain ${alias_domain}: ${alias_cert}" >&2
+    echo "Run cloudflared tunnel login for that zone, then pass --alias-origincert ${alias_cert}." >&2
+    exit 1
+  fi
+
+  route_dns_record "${alias_domain}" "${alias_cert}"
+  route_dns_record "www.${alias_domain}" "${alias_cert}"
+  CONFIG_INGRESS="${CONFIG_INGRESS}
+      - hostname: ${alias_domain}
+        service: http://apex-link-service.apex-link.svc.cluster.local:3000
+      - hostname: www.${alias_domain}
+        service: http://apex-link-service.apex-link.svc.cluster.local:3000"
+done
 
 CREDS_FILE="${TUNNEL_DIR}/${TUNNEL_ID}.json"
 if [ ! -f "${CREDS_FILE}" ]; then
@@ -116,10 +151,7 @@ data:
     credentials-file: /etc/cloudflared/creds/credentials.json
 
     ingress:
-      - hostname: ${DOMAIN}
-        service: http://apex-link-service.apex-link.svc.cluster.local:3000
-      - hostname: www.${DOMAIN}
-        service: http://apex-link-service.apex-link.svc.cluster.local:3000
+${CONFIG_INGRESS}
       - service: http_status:404
 EOF
 

@@ -17,7 +17,7 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
       <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-5 py-6 sm:px-8">
         <nav className="flex items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
           <Link href="/" className="hover:text-[var(--ink)]">
-            Apex Link
+            Most Valuable Link
           </Link>
           <Link href="/history" className="hover:text-[var(--ink)]">
             History
