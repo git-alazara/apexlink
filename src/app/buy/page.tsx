@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { startCheckout } from "./actions";
 import { PriceInput } from "./price-input";
+import { SiteHeader } from "@/app/site-header";
 import { getCurrentLink, getSiteStats, recordPageView } from "@/lib/apex-link";
 import { formatDuration, formatMoney, SITE_DOMAIN } from "@/lib/config";
 
@@ -18,14 +19,7 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
   return (
     <main className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 sm:px-8">
-        <nav className="flex items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
-          <Link href="/" className="hover:text-[var(--ink)]">
-            Most Valuable Link
-          </Link>
-          <Link href="/history" className="hover:text-[var(--ink)]">
-            History
-          </Link>
-        </nav>
+        <SiteHeader />
 
         <div className="flex flex-1 flex-col justify-center py-14">
           <p className="mb-5 text-sm font-bold uppercase tracking-[0.2em] text-[var(--accent)]">

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getOwnershipHistory, getSiteStats, recordPageView } from "@/lib/apex-link";
 import { formatDuration, formatMoney } from "@/lib/config";
+import { SiteHeader } from "@/app/site-header";
 
 export const dynamic = "force-dynamic";
 
@@ -11,14 +12,7 @@ export default async function HistoryPage() {
   return (
     <main className="min-h-screen bg-[var(--paper)] px-5 py-6 text-[var(--ink)] sm:px-8">
       <div className="mx-auto max-w-6xl">
-        <nav className="flex items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
-          <Link href="/" className="hover:text-[var(--ink)]">
-            Most Valuable Link
-          </Link>
-          <Link href="/buy" className="hover:text-[var(--ink)]">
-            Buy
-          </Link>
-        </nav>
+        <SiteHeader />
 
         <div>
           <header className="py-12">

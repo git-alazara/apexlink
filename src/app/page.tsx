@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getCurrentLink, getSiteStats, recordPageView } from "@/lib/apex-link";
 import { formatDuration, formatMoney, SITE_DOMAIN } from "@/lib/config";
 import { VisitorBadge } from "@/app/visitor-badge";
+import { SiteHeader } from "@/app/site-header";
 
 export const dynamic = "force-dynamic";
 
@@ -15,27 +16,7 @@ export default async function Home() {
       <section className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 sm:px-8">
         <div className="absolute inset-x-0 top-24 -z-0 h-72 bg-[radial-gradient(circle_at_30%_20%,rgba(23,118,78,0.18),transparent_34%),radial-gradient(circle_at_78%_34%,rgba(210,71,38,0.14),transparent_32%)]" />
 
-        <nav className="relative z-10 flex items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
-          <Link href="/" className="flex items-center gap-3 text-[var(--ink)]">
-            <Image
-              src="/apex-link.svg"
-              alt="Most Valuable Link"
-              width={40}
-              height={40}
-              priority
-              className="h-10 w-10 object-cover object-center"
-            />
-            Most Valuable Link
-          </Link>
-          <div className="flex gap-5">
-            <Link href="/history" className="hover:text-[var(--ink)]">
-              History
-            </Link>
-            <Link href="/buy" className="hover:text-[var(--ink)]">
-              Buy
-            </Link>
-          </div>
-        </nav>
+        <SiteHeader />
 
         <div className="relative z-10 grid flex-1 items-center gap-12 py-16 lg:grid-cols-[1fr_360px]">
           <div>
