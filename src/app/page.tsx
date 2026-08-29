@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getCurrentLink, getSiteStats, recordPageView } from "@/lib/apex-link";
-import { formatDuration, formatMoney, PRICE_INCREMENT_CENTS, SITE_DOMAIN } from "@/lib/config";
+import { formatDuration, formatMoney, SITE_DOMAIN } from "@/lib/config";
 import { VisitorBadge } from "@/app/visitor-badge";
 
 export const dynamic = "force-dynamic";
@@ -94,7 +94,7 @@ export default async function Home() {
               </p>
             ) : (
               <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
-                The price is at the {formatMoney(stats.floorPriceCents)} floor. Buyers can set the next price at least {formatMoney(PRICE_INCREMENT_CENTS)} above the current price, then it slowly decays back over {stats.decayDays} days.
+                The price is at the {formatMoney(stats.floorPriceCents)} floor. Buyers can set the next price, then it slowly decays back over {stats.decayDays} days.
               </p>
             )}
             <Link href="/buy" className="mt-8 inline-flex h-12 w-full items-center justify-center bg-[var(--ink)] px-5 text-sm font-black uppercase tracking-[0.12em] text-white hover:bg-[var(--accent)]">

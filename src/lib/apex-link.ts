@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { INITIAL_PRICE_CENTS, PRICE_DECAY_DAYS } from "@/lib/config";
+import { getPriceIncrementCents, INITIAL_PRICE_CENTS, PRICE_DECAY_DAYS } from "@/lib/config";
 
 const DEFAULT_LINK = "https://app.budgetgenie.io";
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -282,7 +282,7 @@ export async function completePurchase(stripeSessionId: string, paymentIntentId?
         email: intent.email,
         ownerNumber: intent.nextOwnerNumber,
         previousPriceCents: intent.priceCents,
-        priceCents: intent.priceCents,
+        priceCents: intent.priceCents + getPriceIncrementCents(intent.priceCents),
         stripeSessionId,
       },
       create: {
@@ -291,7 +291,7 @@ export async function completePurchase(stripeSessionId: string, paymentIntentId?
         email: intent.email,
         ownerNumber: intent.nextOwnerNumber,
         previousPriceCents: intent.priceCents,
-        priceCents: intent.priceCents,
+        priceCents: intent.priceCents + getPriceIncrementCents(intent.priceCents),
         stripeSessionId,
       },
     });
@@ -323,7 +323,7 @@ function getPriceState(currentLink: { priceCents: number; ownerNumber: number; u
   const decayDurationMs = Math.max(1, PRICE_DECAY_DAYS) * MS_PER_DAY;
   const elapsedMs = Math.max(0, Date.now() - currentLink.updatedAt.getTime());
   const linearProgress = Math.min(1, elapsedMs / decayDurationMs);
-  const progress = linearProgress ** 2;
+  const progress = linearProgress ** 6;
   const dropCents = peakPriceCents - INITIAL_PRICE_CENTS;
   const currentPriceCents = Math.max(INITIAL_PRICE_CENTS, Math.ceil(peakPriceCents - dropCents * progress));
 
