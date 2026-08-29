@@ -15,6 +15,11 @@ const jetBrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Most Valuable Link",
   description: "Buy the one homepage link on mostvaluable.link.",
+  icons: {
+    icon: "/apex-link.svg",
+    shortcut: "/apex-link.svg",
+    apple: "/apex-link.svg",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
