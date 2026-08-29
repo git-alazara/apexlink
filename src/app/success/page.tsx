@@ -3,8 +3,8 @@ import { SiteHeader } from "@/app/site-header";
 
 export default function SuccessPage() {
   return (
-    <main className="flex min-h-screen items-center bg-[var(--paper)] px-5 py-6 text-[var(--ink)] sm:px-8">
-      <section className="mx-auto w-full max-w-6xl">
+    <main className="flex min-h-screen items-center bg-[var(--paper)] py-6 text-[var(--ink)]">
+      <section className="mx-auto w-full max-w-6xl px-5 sm:px-8">
         <SiteHeader />
         <div className="mt-20">
         <p className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--accent)]">Payment received</p>

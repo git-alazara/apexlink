@@ -10,8 +10,8 @@ export default async function HistoryPage() {
   const [history, stats] = await Promise.all([getOwnershipHistory(), getSiteStats()]);
 
   return (
-    <main className="min-h-screen bg-[var(--paper)] px-5 py-6 text-[var(--ink)] sm:px-8">
-      <div className="mx-auto max-w-6xl">
+    <main className="min-h-screen bg-[var(--paper)] py-6 text-[var(--ink)]">
+      <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
         <SiteHeader />
 
         <div>
