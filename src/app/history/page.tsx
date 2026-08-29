@@ -10,7 +10,7 @@ export default async function HistoryPage() {
 
   return (
     <main className="min-h-screen bg-[var(--paper)] px-5 py-6 text-[var(--ink)] sm:px-8">
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-6xl">
         <nav className="flex items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
           <Link href="/" className="hover:text-[var(--ink)]">
             Most Valuable Link
@@ -20,12 +20,13 @@ export default async function HistoryPage() {
           </Link>
         </nav>
 
-        <header className="py-12">
+        <div className="mx-auto max-w-4xl">
+          <header className="py-12">
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--accent)]">Ownership history</p>
           <h1 className="mt-5 max-w-2xl text-4xl font-black leading-tight tracking-normal sm:text-5xl">Every owner keeps a place.</h1>
-        </header>
+          </header>
 
-        <dl className="mb-10 grid grid-cols-2 gap-px overflow-hidden border border-[var(--line)] bg-[var(--line)] sm:grid-cols-4">
+          <dl className="mb-10 grid grid-cols-2 gap-px overflow-hidden border border-[var(--line)] bg-[var(--line)] sm:grid-cols-4">
           <div className="bg-[var(--paper)] p-4">
             <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Total views</dt>
             <dd className="mt-2 text-xl font-black">{stats.totalViews.toLocaleString()}</dd>
@@ -42,9 +43,9 @@ export default async function HistoryPage() {
             <dt className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Current owner</dt>
             <dd className="mt-2 text-xl font-black">#{stats.ownerNumber}</dd>
           </div>
-        </dl>
+          </dl>
 
-        <section className="border-t border-[var(--line)]">
+          <section className="border-t border-[var(--line)]">
           {history.length === 0 ? (
             <p className="py-10 text-lg text-[var(--muted)]">No owners yet. The first spot is still open.</p>
           ) : (
@@ -64,7 +65,8 @@ export default async function HistoryPage() {
               </article>
             ))
           )}
-        </section>
+          </section>
+        </div>
       </div>
     </main>
   );

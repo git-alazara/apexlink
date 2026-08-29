@@ -3,7 +3,8 @@ import Link from "next/link";
 export default function SuccessPage() {
   return (
     <main className="flex min-h-screen items-center bg-[var(--paper)] px-5 py-6 text-[var(--ink)] sm:px-8">
-      <section className="mx-auto max-w-2xl">
+      <section className="mx-auto w-full max-w-6xl">
+        <div className="max-w-2xl">
         <p className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--accent)]">Payment received</p>
         <h1 className="mt-5 text-4xl font-black leading-tight tracking-normal sm:text-5xl">You own the Most Valuable Link.</h1>
         <p className="mt-6 text-lg leading-8 text-[var(--muted)]">
@@ -16,6 +17,7 @@ export default function SuccessPage() {
           <Link href="/history" className="inline-flex h-12 items-center justify-center border border-[var(--line)] px-5 text-sm font-black uppercase tracking-[0.12em] hover:border-[var(--ink)]">
             View history
           </Link>
+        </div>
         </div>
       </section>
     </main>

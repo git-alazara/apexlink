@@ -17,7 +17,7 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
 
   return (
     <main className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
-      <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-5 py-6 sm:px-8">
+      <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 sm:px-8">
         <nav className="flex items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
           <Link href="/" className="hover:text-[var(--ink)]">
             Most Valuable Link
@@ -27,7 +27,7 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
           </Link>
         </nav>
 
-        <div className="flex flex-1 flex-col justify-center py-14">
+        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center py-14">
           <p className="mb-5 text-sm font-bold uppercase tracking-[0.2em] text-[var(--accent)]">
             Take the link
           </p>
