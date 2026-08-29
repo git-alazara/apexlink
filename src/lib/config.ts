@@ -2,7 +2,7 @@ export const SITE_NAME = "Most Valuable Link";
 export const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "mostvaluable.link";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? `https://${SITE_DOMAIN}`;
 
-export const INITIAL_PRICE_CENTS = Number(process.env.INITIAL_PRICE_CENTS ?? 1000);
+export const INITIAL_PRICE_CENTS = Number(process.env.INITIAL_PRICE_CENTS ?? 100);
 export const PRICE_DECAY_DAYS = Number(process.env.PRICE_DECAY_DAYS ?? 90);
 const PRICE_INCREMENT_RATE = 0.01;
 const MAX_PRICE_INCREMENT_CENTS = 2500;
