@@ -27,7 +27,7 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
           </Link>
         </nav>
 
-        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center py-14">
+        <div className="flex flex-1 flex-col justify-center py-14">
           <p className="mb-5 text-sm font-bold uppercase tracking-[0.2em] text-[var(--accent)]">
             Take the link
           </p>

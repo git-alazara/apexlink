@@ -20,7 +20,7 @@ export default async function HistoryPage() {
           </Link>
         </nav>
 
-        <div className="mx-auto max-w-4xl">
+        <div>
           <header className="py-12">
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--accent)]">Ownership history</p>
           <h1 className="mt-5 max-w-2xl text-4xl font-black leading-tight tracking-normal sm:text-5xl">Every owner keeps a place.</h1>
