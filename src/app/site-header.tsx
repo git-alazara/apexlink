@@ -13,9 +13,12 @@ export function SiteHeader() {
           priority
           className="h-10 w-10 object-cover object-center"
         />
-        Most Valuable Link
+        <span className="hidden sm:inline">Most Valuable Link</span>
       </Link>
-      <nav className="flex gap-5">
+      <nav className="flex gap-3 text-[11px] sm:gap-5 sm:text-sm">
+        <Link href="/how-it-works" className="hover:text-[var(--ink)]">
+          How<span className="hidden sm:inline"> it works</span>
+        </Link>
         <Link href="/history" className="hover:text-[var(--ink)]">
           History
         </Link>

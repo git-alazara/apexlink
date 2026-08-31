@@ -2,8 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { getCurrentLink, getSiteStats, recordPageView } from "@/lib/apex-link";
 import { formatDuration, formatMoney, SITE_DOMAIN } from "@/lib/config";
-import { VisitorBadge } from "@/app/visitor-badge";
 import { SiteHeader } from "@/app/site-header";
+import { VisitorBadge } from "@/app/visitor-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ export default async function Home() {
         <div className="relative z-10 grid flex-1 items-center gap-12 py-16 lg:grid-cols-[1fr_360px]">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--accent)]">
-              One link. One owner. One dollar more each time.
+              One link. One owner. One cent more each time.
             </p>
             <VisitorBadge />
             <h1 className="mt-6 max-w-3xl text-5xl font-black leading-[0.95] tracking-normal sm:text-6xl lg:text-7xl">

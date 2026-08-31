@@ -70,14 +70,17 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
                 className="h-14 rounded-none border border-[var(--line)] bg-white px-4 text-base font-semibold normal-case tracking-normal text-[var(--ink)] outline-none transition focus:border-[var(--ink)]"
               />
             </label>
-            <label className="grid gap-2 text-sm font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
-              Email optional
+            <label className="flex items-start gap-3 text-sm leading-6 text-[var(--muted)]">
               <input
-                name="email"
-                type="email"
-                placeholder="owner@example.com"
-                className="h-14 rounded-none border border-[var(--line)] bg-white px-4 text-base font-semibold normal-case tracking-normal text-[var(--ink)] outline-none transition focus:border-[var(--ink)]"
+                name="rulesAccepted"
+                type="checkbox"
+                value="accepted"
+                required
+                className="mt-1 h-4 w-4 shrink-0 accent-[var(--ink)]"
               />
+              <span>
+                I agree to <Link href="/how-it-works" className="font-bold text-[var(--ink)] underline underline-offset-4">How It Works</Link> and the <Link href="/privacy" className="font-bold text-[var(--ink)] underline underline-offset-4">Privacy Policy</Link>.
+              </span>
             </label>
             <button className="mt-2 h-14 bg-[var(--ink)] px-6 text-base font-black uppercase tracking-[0.12em] text-white transition hover:bg-[var(--accent)]">
               Continue to payment
@@ -88,7 +91,7 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
           {canceled ? <p className="mt-4 text-sm font-semibold text-[var(--muted)]">Checkout canceled. The link is still available.</p> : null}
 
           <p className="mt-8 text-sm leading-6 text-[var(--muted)]">
-            You are buying one hyperlink and nothing else. Promo codes can be applied in Stripe Checkout. Links to illegal content, malware, phishing, pornography, hate or extremist material, and obvious scams may be removed and refunded. Card payments are handled by Stripe.
+            You are buying one hyperlink and nothing else. Promo codes can be applied in Stripe Checkout. Prohibited links may be removed under the published rules. Card payments are handled by Stripe.
           </p>
 
           <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden border border-[var(--line)] bg-[var(--line)] sm:grid-cols-4">

@@ -28,7 +28,7 @@ export function VisitorBadge() {
 
   return (
     <p className="mt-5 inline-flex border border-[var(--line)] bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-[var(--muted)] shadow-[4px_4px_0_var(--shadow)]">
-      Total visitors {totalVisitors.toLocaleString()}
+      Total unique visitors {totalVisitors.toLocaleString()}
     </p>
   );
 }

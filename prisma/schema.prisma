@@ -14,38 +14,37 @@ enum PurchaseStatus {
 }
 
 model CurrentLink {
-  id              Int      @id @default(1)
-  url             String
-  email           String?
-  ownerNumber     Int      @default(0)
-  priceCents      Int
+  id                 Int      @id @default(1)
+  url                String
+  ownerNumber        Int      @default(0)
+  priceCents         Int
   previousPriceCents Int?
-  stripeSessionId String?  @unique
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  stripeSessionId    String?  @unique
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model PurchaseIntent {
   id              String         @id @default(cuid())
   url             String
-  email           String?
   priceCents      Int
   nextOwnerNumber Int
   stripeSessionId String         @unique
+  rulesVersion    String
   status          PurchaseStatus @default(PENDING)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 }
 
 model Ownership {
-  id                    String   @id @default(cuid())
-  ownerNumber           Int      @unique
+  id                    String    @id @default(cuid())
+  ownerNumber           Int       @unique
   url                   String
-  email                 String?
   priceCents            Int
-  stripeSessionId       String   @unique
+  stripeSessionId       String    @unique
   stripePaymentIntentId String?
-  createdAt             DateTime @default(now())
+  rulesVersion          String?
+  createdAt             DateTime  @default(now())
   endedAt               DateTime?
 
   @@index([endedAt])

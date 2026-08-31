@@ -12,7 +12,7 @@ export async function GET() {
   const token = cookieStore.get(VISITOR_COOKIE)?.value;
   const visitor = await getOrCreateVisitor(token);
   const totalVisitors = await getTotalVisitors();
-  const response = NextResponse.json({ totalVisitors, visitorNumber: visitor.visitorNumber });
+  const response = NextResponse.json({ totalVisitors });
 
   if (visitor.token !== token) {
     response.cookies.set(VISITOR_COOKIE, visitor.token, {

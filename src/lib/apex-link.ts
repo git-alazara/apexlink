@@ -44,6 +44,29 @@ export async function getOwnershipHistory() {
   return ownersWithClicks;
 }
 
+export async function getOwnerDetails(ownerNumber: number) {
+  const owner = await prisma.ownership.findUnique({ where: { ownerNumber } });
+
+  if (!owner) {
+    return null;
+  }
+
+  const [clicks, views] = await Promise.all([
+    getOwnerClickCount(ownerNumber),
+    prisma.pageView.count({
+      where: {
+        path: "/",
+        createdAt: {
+          gte: owner.createdAt,
+          lte: owner.endedAt ?? new Date(),
+        },
+      },
+    }),
+  ]);
+
+  return { ...owner, clicks, views };
+}
+
 export async function getPurchaseState() {
   const currentLink = await getCurrentLink();
 
@@ -213,24 +236,26 @@ async function getOwnerClickCount(ownerNumber: number) {
 
 export async function createPurchaseIntent(input: {
   url: string;
-  email?: string;
   stripeSessionId: string;
   priceCents: number;
   nextOwnerNumber: number;
+  rulesVersion: string;
 }) {
   return prisma.purchaseIntent.create({
     data: {
       url: input.url,
-      email: input.email,
       priceCents: input.priceCents,
       nextOwnerNumber: input.nextOwnerNumber,
       stripeSessionId: input.stripeSessionId,
+      rulesVersion: input.rulesVersion,
     },
   });
 }
 
 export async function completePurchase(stripeSessionId: string, paymentIntentId?: string | null) {
   return prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(8675309)`;
+
     const intent = await tx.purchaseIntent.findUnique({
       where: { stripeSessionId },
     });
@@ -251,26 +276,30 @@ export async function completePurchase(stripeSessionId: string, paymentIntentId?
       return existingOwnership;
     }
 
+    const currentLink = await tx.currentLink.findUnique({ where: { id: 1 } });
+    const ownerNumber = (currentLink?.ownerNumber ?? 0) + 1;
     const completedAt = new Date();
 
-    await tx.ownership.updateMany({
-      where: {
-        ownerNumber: intent.nextOwnerNumber - 1,
-        endedAt: null,
-      },
-      data: {
-        endedAt: completedAt,
-      },
-    });
+    if (currentLink) {
+      await tx.ownership.updateMany({
+        where: {
+          ownerNumber: currentLink.ownerNumber,
+          endedAt: null,
+        },
+        data: {
+          endedAt: completedAt,
+        },
+      });
+    }
 
     const ownership = await tx.ownership.create({
       data: {
-        ownerNumber: intent.nextOwnerNumber,
+        ownerNumber,
         url: intent.url,
-        email: intent.email,
         priceCents: intent.priceCents,
         stripeSessionId,
         stripePaymentIntentId: paymentIntentId ?? undefined,
+        rulesVersion: intent.rulesVersion,
         createdAt: completedAt,
       },
     });
@@ -279,26 +308,24 @@ export async function completePurchase(stripeSessionId: string, paymentIntentId?
       where: { id: 1 },
       update: {
         url: intent.url,
-        email: intent.email,
-        ownerNumber: intent.nextOwnerNumber,
+        ownerNumber,
         previousPriceCents: intent.priceCents,
-        priceCents: intent.priceCents + getPriceIncrementCents(intent.priceCents),
+        priceCents: intent.priceCents + getPriceIncrementCents(),
         stripeSessionId,
       },
       create: {
         id: 1,
         url: intent.url,
-        email: intent.email,
-        ownerNumber: intent.nextOwnerNumber,
+        ownerNumber,
         previousPriceCents: intent.priceCents,
-        priceCents: intent.priceCents + getPriceIncrementCents(intent.priceCents),
+        priceCents: intent.priceCents + getPriceIncrementCents(),
         stripeSessionId,
       },
     });
 
     await tx.purchaseIntent.update({
       where: { stripeSessionId },
-      data: { status: "PAID" },
+      data: { status: "PAID", nextOwnerNumber: ownerNumber },
     });
 
     return ownership;
