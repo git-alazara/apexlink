@@ -58,15 +58,23 @@ export default async function BuyPage({ searchParams }: PageProps<"/buy">) {
           <form action={startCheckout} className="mt-8 grid gap-4">
             <label className="grid gap-2 text-sm font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
               Your price USD
-              <PriceInput minimumPriceDollars={minimumPriceDollars} />
+              <PriceInput
+                minimumPriceCents={minimumPriceCents}
+                minimumPriceDollars={minimumPriceDollars}
+                minimumPriceLabel={formatMoney(minimumPriceCents)}
+              />
             </label>
             <label className="grid gap-2 text-sm font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
               Website URL
               <input
                 name="url"
-                type="url"
+                type="text"
+                inputMode="url"
                 required
-                placeholder="https://example.com"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                placeholder="example.com or https://example.com"
                 className="h-14 rounded-none border border-[var(--line)] bg-white px-4 text-base font-semibold normal-case tracking-normal text-[var(--ink)] outline-none transition focus:border-[var(--ink)]"
               />
             </label>

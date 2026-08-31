@@ -1,25 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { z } from "zod";
 import { formatMoney, RULES_VERSION, SITE_NAME, SITE_URL } from "@/lib/config";
 import { createPurchaseIntent, getPurchaseState } from "@/lib/apex-link";
+import { parsePriceCents } from "@/lib/purchase-input";
+import { purchaseSchema } from "@/lib/purchase-validation";
 import { getStripe } from "@/lib/stripe";
-
-const purchaseSchema = z.object({
-  url: z.string().trim().url().refine((value) => ["http:", "https:"].includes(new URL(value).protocol), {
-    message: "Use a valid http or https URL.",
-  }),
-  priceCents: z.coerce.number().int().positive(),
-});
-
-function parsePriceCents(value: FormDataEntryValue | null) {
-  if (typeof value !== "string") {
-    return NaN;
-  }
-
-  return Math.round(Number(value) * 100);
-}
 
 export async function startCheckout(formData: FormData) {
   if (formData.get("rulesAccepted") !== "accepted") {

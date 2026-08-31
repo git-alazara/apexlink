@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, type KeyboardEvent } from "react";
+import { getPriceValidationMessage } from "@/lib/purchase-input";
 
 type PriceInputProps = {
+  minimumPriceCents: number;
   minimumPriceDollars: string;
+  minimumPriceLabel: string;
 };
 
 function formatPrice(value: string) {
@@ -46,32 +49,54 @@ function isAllowedKey(event: KeyboardEvent<HTMLInputElement>) {
   return !event.currentTarget.value.includes(".");
 }
 
-export function PriceInput({ minimumPriceDollars }: PriceInputProps) {
+export function PriceInput({ minimumPriceCents, minimumPriceDollars, minimumPriceLabel }: PriceInputProps) {
   const [value, setValue] = useState(minimumPriceDollars);
+  const [validationMessage, setValidationMessage] = useState("");
+
+  function updateValue(nextValue: string, input: HTMLInputElement) {
+    const nextValidationMessage = getPriceValidationMessage(
+      nextValue,
+      minimumPriceCents,
+      minimumPriceLabel,
+    );
+
+    input.setCustomValidity(nextValidationMessage);
+    setValidationMessage(nextValidationMessage);
+    setValue(nextValue);
+  }
 
   return (
-    <input
-      name="priceDollars"
-      type="text"
-      inputMode="decimal"
-      required
-      value={value}
-      onKeyDown={(event) => {
-        if (!isAllowedKey(event)) {
-          event.preventDefault();
-        }
-      }}
-      onPaste={(event) => {
-        const pastedValue = event.clipboardData.getData("text");
-
-        if (sanitizePriceInput(pastedValue) !== pastedValue) {
-          event.preventDefault();
-          setValue(sanitizePriceInput(pastedValue));
-        }
-      }}
-      onChange={(event) => setValue(sanitizePriceInput(event.target.value))}
-      onBlur={() => setValue((currentValue) => formatPrice(currentValue) || minimumPriceDollars)}
-      className="h-14 rounded-none border border-[var(--line)] bg-white px-4 text-base font-semibold normal-case tracking-normal text-[var(--ink)] outline-none transition focus:border-[var(--ink)]"
-    />
+    <>
+      <input
+        name="priceDollars"
+        type="text"
+        inputMode="decimal"
+        required
+        value={value}
+        aria-describedby={validationMessage ? "price-validation-message" : undefined}
+        aria-invalid={validationMessage ? true : undefined}
+        onKeyDown={(event) => {
+          if (!isAllowedKey(event)) {
+            event.preventDefault();
+          }
+        }}
+        onChange={(event) => {
+          updateValue(sanitizePriceInput(event.target.value), event.currentTarget);
+        }}
+        onBlur={(event) => {
+          updateValue(formatPrice(value) || minimumPriceDollars, event.currentTarget);
+        }}
+        className="h-14 rounded-none border border-[var(--line)] bg-white px-4 text-base font-semibold normal-case tracking-normal text-[var(--ink)] outline-none transition focus:border-[var(--ink)]"
+      />
+      {validationMessage ? (
+        <span
+          id="price-validation-message"
+          role="alert"
+          className="text-sm font-semibold normal-case tracking-normal text-[var(--danger)]"
+        >
+          {validationMessage}
+        </span>
+      ) : null}
+    </>
   );
 }
