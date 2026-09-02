@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getPriceIncrementCents, INITIAL_PRICE_CENTS, PRICE_DECAY_DAYS } from "@/lib/config";
+import { acquirePurchaseTransactionLock } from "@/lib/purchase-lock";
 
 const DEFAULT_LINK = "https://app.budgetgenie.io";
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -254,7 +255,7 @@ export async function createPurchaseIntent(input: {
 
 export async function completePurchase(stripeSessionId: string, paymentIntentId?: string | null) {
   return prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`SELECT pg_advisory_xact_lock(8675309)`;
+    await acquirePurchaseTransactionLock(tx);
 
     const intent = await tx.purchaseIntent.findUnique({
       where: { stripeSessionId },
